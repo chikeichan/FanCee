@@ -12,6 +12,53 @@ app.config(function($routeProvider){
 app.factory('mahjongFactory', function(){
 	var factory = {};
 
+		factory.defaultSets = {
+		bamboo : {
+			'1': 4,
+			'2': 4,
+			'3': 4,
+			'4': 4,
+			'5': 4,
+			'6': 4,
+			'7': 4,
+			'8': 4,
+			'9': 4
+		},
+		man : {
+			'1': 4,
+			'2': 4,
+			'3': 4,
+			'4': 4,
+			'5': 4,
+			'6': 4,
+			'7': 4,
+			'8': 4,
+			'9': 4
+		},
+		pin : {
+			'1': 4,
+			'2': 4,
+			'3': 4,
+			'4': 4,
+			'5': 4,
+			'6': 4,
+			'7': 4,
+			'8': 4,
+			'9': 4
+		},
+		dragon : {
+			'chun': 4,
+			'green': 4,
+			'haku' : 4
+		},
+		wind : {
+			'east' : 4,
+			'north' : 4,
+			'south' : 4,
+			'west' : 4
+		}
+	}
+
 	factory.fullSets = {
 		bamboo : {
 			'1': 4,
@@ -108,6 +155,7 @@ app.factory('mahjongFactory', function(){
 		for (var i=0; i<set.length; i++){
 			var mj = '<img id="'+position+'" src="../graphics/face-down-128px.png"></img>';
 			$pos.append(mj);
+			$('img').fadeIn('slow');
 		}
 	}
 
@@ -124,15 +172,25 @@ app.controller('ctrl', ['$scope','$http', 'mahjongFactory',function ctrl($scope,
 	$scope.displayOpponents = mahjongFactory.displayOpponents;
 	$scope.shuffleSets = mahjongFactory.shuffleSets;
 
-	$scope.startGame = function(){
-		$scope.gameSets = $scope.shuffleSets();
-		console.log($scope.gameSets);
-		$scope.readySets();
-		$scope.displayCard($scope.mySets, 'me');
-		$scope.displayOpponents($scope.rSets, 'right');
-		$scope.displayOpponents($scope.uSets, 'up');
-		$scope.displayOpponents($scope.lSets, 'left');
-		console.log($scope.gameSets);
-	}
+	$scope.gameSets = mahjongFactory.shuffleSets();
+	$scope.readySets();
+	$scope.displayCard($scope.mySets, 'me');
+	$scope.displayOpponents($scope.rSets, 'right');
+	$scope.displayOpponents($scope.uSets, 'up');
+	$scope.displayOpponents($scope.lSets, 'left');
+	console.log(mahjongFactory.shuffleSets());
+
+	$('img#me').mouseenter(function(){
+		$(this).stop().animate({
+			'top': '-20px'
+		},100);
+	})
+
+	$('img#me').mouseleave(function(){
+		$(this).stop().animate({
+			'top': '0px'
+		},100);
+	})
+
 
 }]);

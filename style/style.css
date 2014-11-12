@@ -47,29 +47,30 @@ body {
 	color: white;
 }
 
+img {
+	display: none;
+}
+
 img#me {
+	position: relative;
 	width: 51px;
-	display: inline-block;
 	margin-left: -12px;
 }
 
 img#left {
 	width: 51px;
-	display: inline-block;
 	margin-top: -15px;
 	transform: rotate(90deg);
 }
 
 img#right {
 	width: 51px;
-	display: inline-block;
 	margin-top: -15px;
 	transform: rotate(90deg);
 }
 
 img#up {
 	width: 51px;
-	display: inline-block;
 	margin-left: -12px;
 }
 
