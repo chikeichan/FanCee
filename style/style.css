@@ -1,0 +1,79 @@
+div.myCanvas {
+	background-color: rgb(0, 48, 8);
+	width: 700px;
+	height: 700px;
+	margin: 0 auto 0 auto;
+	display: block;
+	border: 10px solid rgb(56, 24, 0);
+	position: relative;
+}
+
+div#me {
+	width: 550px;
+	height: 50px;
+	position: absolute;
+	top: 630px;
+	left: 85px;
+}
+
+div#left {
+	width: 50px;
+	height: 550px;
+	position: absolute;
+	top: 80px;
+	left: 30px;
+}
+
+div#right {
+	width: 50px;
+	height: 550px;
+	position: absolute;
+	top: 80px;
+	left: 630px;
+}
+
+div#up {
+	width: 550px;
+	height: 50px;
+	position: absolute;
+	top: 20px;
+	left: 85px;
+}
+
+
+
+body {
+	text-align: center;
+	color: white;
+}
+
+img#me {
+	width: 51px;
+	display: inline-block;
+	margin-left: -12px;
+}
+
+img#left {
+	width: 51px;
+	display: inline-block;
+	margin-top: -15px;
+	transform: rotate(90deg);
+}
+
+img#right {
+	width: 51px;
+	display: inline-block;
+	margin-top: -15px;
+	transform: rotate(90deg);
+}
+
+img#up {
+	width: 51px;
+	display: inline-block;
+	margin-left: -12px;
+}
+
+button.ng-scope {
+position: relative;
+top: -35px;
+}
