@@ -1,18 +1,22 @@
 <!DOCTYPE html>
-<html ng-app='app'>
+<html>
 <head>
 	<title>Fan-Cee</title>
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
 		<script src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
 		<script src ='https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js'></script>
-		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular-route.js"></script>
 		<script src ='../module/app.js'></script>
 		<link rel='stylesheet' type='text/css' href='../style/style.css'>
 </head>
 <body background = '../graphics/wood3.png'>
 	<h1>Fan-Cee</h1>
-	<div class='myCanvas' data-ng-view=''>
 
+	<div class='myCanvas' data-ng-view=''>
+		<div id='me'></div>
+		<div id='right'></div>
+		<div id='up'></div>
+		<div id='left'></div>
+		<div id='field'></div>
 	</div>
 
 	</div>
