@@ -99,6 +99,49 @@ mj.displayOpponents = function(set, position) {
 	}
 }
 
+mj.ifPong = function(position){
+	var pong = false;
+	var playerPong;
+	var lastSet = mj.playedSets[mj.playedSets.length-1];
+	var players;
+		if(position === 'right'){
+			players = ['lSets','mySets','uSets'];
+		} else if (position === 'left'){
+			players = ['rSets','mySets','uSets'];
+		} else if (position === 'up') {
+			players = ['lSets','mySets','rSets'];
+		} else if (position === 'me') {
+			players = ['lSets','uSets','rSets'];
+		}
+
+	_.each(players, function(player){
+		var dup = _.filter(mj[player], function(set){
+			return set === lastSet;
+		});
+		if(dup.length === 2){
+			pong = true;
+			playerPong = player;
+		};
+	});
+
+	if(playerPong === 'lSets'){
+		playerPong = 'left'
+	} else if(playerPong === 'rSets'){
+		playerPong = 'right'
+	} else if(playerPong === 'uSets'){
+		playerPong = 'up'
+	} else if(playerPong === 'mySets'){
+		playerPong = 'me'
+	}
+
+	return [pong, playerPong];
+}
+
+mj.listenPong = function(position){
+	var lastSet = mj.playedSets[mj.playedSets.length-1];
+	
+}
+
 $(document).ready(function(){
 	mj.gameSets = mj.shuffleSets();
 	mj.readySets();
@@ -146,7 +189,12 @@ $(document).ready(function(){
 			$('div#field').append('<img id="field" src="../graphics/'+setStr+'.png"></img>');
 			mj.refresh('me');
 			mj.currentPos = 'right';
-			mj.next('right');
+
+			console.log(mj.ifPong('me'));
+
+			_.delay(function(){
+				mj.next('right');
+			},500);
 		}
 	})
 
@@ -167,25 +215,33 @@ $(document).ready(function(){
 		$pos.html('');
 		mj.displayOpponents(mj[set], position);
 
-		var playedSet = mj[set].splice(5,1)
+		var playedSet = mj[set].splice(5,1)[0]
 		mj.playedSets.push(playedSet);
 		$('div#field').append('<img id="field" src="../graphics/'+playedSet+'.png"></img>');
 		$pos.html('');
 		mj.displayOpponents(mj[set], position);
-		
-		if(mj.gameSets.length > 0) {
-			if(position === 'right'){
-				mj.currentPos === 'up';
-				mj.next('up');
-			} else if (position === 'left'){
-				mj.currentPos = 'me';
-				mj.mySets.push(mj.gameSets.pop());
-				mj.refresh('me');
-			} else if (position === 'up') {
-				mj.currentPos = 'left';
-				mj.next('left');
-			}
-		} 
+
+
+
+		if(mj.ifPong(position)[0]){
+			mj.listenPong(mj.ifPong(position)[1]);
+		} else {
+			_.delay(function(){
+				if(mj.gameSets.length > 0) {
+					if(position === 'right'){
+						mj.currentPos === 'up';
+						mj.next('up');
+					} else if (position === 'left'){
+						mj.currentPos = 'me';
+						mj.mySets.push(mj.gameSets.pop());
+						mj.refresh('me');
+					} else if (position === 'up') {
+						mj.currentPos = 'left';
+						mj.next('left');
+					}
+				}
+			},500);
+		}
 		
 
 	}
