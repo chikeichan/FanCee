@@ -334,50 +334,43 @@ mj.winningHand = function(position,set){
 	var pair= [];
 	var threes = [];
 	var seq = [];
+	var seq2 = [];
 	var winHand = [];
 
-	var AISets = mj.nextAI(position,set);
-	var AISets = _.groupBy(AISets,function(tile){
-		return tile.cardType;
-	})
+	//Get Seq first
+	var seqArray = _.uniq(mj[set]);
 
-	
-	//Get Grouped Sets
-	_.each(AISets,function(typeArray,type){
-		theSet[type]=[];
-		_.each(typeArray,function(tile){
-			theSet[type].push(tile.cardNum);
-		})
-		theSet[type] = _.sortBy(theSet[type],function(num){
-			return num;
-		})
-	})
+	var preValue = seqArray[0];
+	var seqTimes = 1;
 
-	//Get Sequence First
-	_.each(theSet,function(typeArray,type){
-		var seqCheck = _.uniq(typeArray);
-		var seqArray = [];
-		var preValue = seqCheck[0];
-		var seqTimes = 1;
+	for(var i=1;i<seqArray.length;i++){
+		var selectKey = seqArray[i].split('-')[0];
+		var selectProp = seqArray[i].split('-')[1];
+		var compareKey = preValue.split('-')[0];
+		var compareProp = preValue.split('-')[1];
 
-		for(var i=1;i<seqCheck.length;i++){
-			if(+preValue+1 == seqCheck[i]){
-				preValue = seqCheck[i];
+		if(selectKey === compareKey){
+			if(selectProp-1 === +compareProp){
 				seqTimes++;
-				if(seqTimes === 3){
-					seq.push(type+'-'+(preValue-2));
-					seq.push(type+'-'+(preValue-1));
-					seq.push(type+'-'+preValue);
+				preValue = seqArray[i];
+				if(seqTimes===3){
+					seq.push(seqArray[i-2]);
+					seq.push(seqArray[i-1]);
+					seq.push(seqArray[i]);
 					seqTimes = 0
-					preValue = null;
+					preValue = '-';
 				}
 			} else {
-				preValue = seqCheck[i];
 				seqTimes = 1;
+				preValue = seqArray[i];
 			}
+		} else {
+			seqTimes = 1;
+			preValue = seqArray[i];
 		}
-	})
+	}
 
+	//Take out Seq sets from original array
 	var setArray = mj[set].slice();
 
 	_.each(seq,function(set){
@@ -390,6 +383,58 @@ mj.winningHand = function(position,set){
 			}
 		})
 	});
+
+	//Get Seq second
+	var seqArray = _.uniq(setArray);
+
+	var preValue = seqArray[0];
+	var seqTimes = 1;
+
+	for(var i=1;i<seqArray.length;i++){
+		var selectKey = seqArray[i].split('-')[0];
+		var selectProp = seqArray[i].split('-')[1];
+		var compareKey = preValue.split('-')[0];
+		var compareProp = preValue.split('-')[1];
+
+		if(selectKey === compareKey){
+			if(selectProp-1 === +compareProp){
+				seqTimes++;
+				preValue = seqArray[i];
+				if(seqTimes===3){
+					seq2.push(seqArray[i-2]);
+					seq2.push(seqArray[i-1]);
+					seq2.push(seqArray[i]);
+					seqTimes = 0
+					preValue = '-';
+				}
+			} else {
+				seqTimes = 1;
+				preValue = seqArray[i];
+			}
+		} else {
+			seqTimes = 1;
+			preValue = seqArray[i];
+		}
+	}
+
+	//Take out Seq sets from original array
+
+	_.each(seq2,function(set){
+
+		var dup = false;
+		_.each(setArray,function(mySet,i){
+			if(mySet === set && dup === false){
+				setArray.splice(i,1);
+				dup=true;
+			}
+		})
+	});
+
+	_.each(seq2,function(x){
+		seq.push(x);
+	})
+
+
 
 	
 
@@ -462,7 +507,11 @@ mj.winningHand = function(position,set){
 
 };
 
-
+mj.test = ["bamboo-4", "bamboo-5", "bamboo-6",
+					 "man-1", "man-1",
+					 "pin-5", "pin-6", "pin-7",
+					 "wind-east", "wind-east","wind-east",
+					 "pin-4", "pin-5", "pin-6"]
 
 //Main recursive logic to execute next round of playing until there are only 4
 //cards left in the gamesets
