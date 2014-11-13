@@ -220,7 +220,6 @@ mj.pong = function(position){
 	mj['Pong'+set].push(slastSet);
 	mj['Pong'+set].push(slastSet);
 	
-	
 	mj.refresh(position);
 	mj.displayPong(mj['Pong'+set],position);
 	mj.refresh('field');
@@ -278,6 +277,59 @@ var playWood = function(){
 	}
 }
 
+//AI to select which piece to play
+mj.nextAI = function(position, set){
+	var answer = 'no';
+	var AISet = [];
+	_.each(mj[set], function(x,i){
+		AISet.push({
+			cardName: x,
+			cardType: x.split('-')[0],
+			cardNum: x.split('-')[1],
+			cardVal: 0,
+			cardIndex: i
+		})
+	})
+
+	for (var i=0; i<AISet.length; i++){
+		var select = AISet[i];
+		var times = 0;
+		if(select.cardType!=='wind'&&select.cardType!=='zdragon'){
+			select.cardVal++;
+			if(select.cardNum >= 3 && select.cardNum <= 7){
+				select.cardVal++;
+			}
+		}
+		for(var j=0; j<AISet.length; j++){
+			if(i!==j){
+				var compare = AISet[j]
+				if(select.cardType === compare.cardType){
+					if(select.cardNum === compare.cardNum){
+						select.cardVal = select.cardVal+3;
+						times++;
+						if(times === 2){select.cardVal = select.cardVal+2;}
+						if(times === 3){select.cardVal = select.cardVal+4;}
+					};
+					if(select.cardNum - compare.cardNum >= -1 && select.cardNum - compare.cardNum <= 1 ){
+						select.cardVal++;
+					};
+					if(select.cardNum - compare.cardNum >= -2 && select.cardNum - compare.cardNum <= 2 ){
+						select.cardVal++;
+					}
+				};
+				
+			}
+		}
+	}
+	var lowest = _.sortBy(AISet, function(x){
+		return x.cardVal;
+	});
+
+
+	console.log(lowest[0]);
+	return lowest[0].cardIndex;
+}
+
 
 //Main recursive logic to execute next round of playing until there are only 4
 //cards left in the gamesets
@@ -300,8 +352,12 @@ mj.next = function(position, draw){
 		mj[set].push(mj.gameSets.pop());
 		mj.refresh(position);
 	}
+	var index = mj.nextAI(position, set);
 
-	var playedSet = mj[set].splice(5,1)[0]
+	if(typeof index !== 'number') return;
+
+	var playedSet = mj[set].splice(index,1)[0];
+	//console.log(playedSet);
 	mj.playedSets.push(playedSet);
 
 	playWood();
@@ -338,10 +394,6 @@ mj.next = function(position, draw){
 
 //DOM Manipulation and Interactions
 $(document).ready(function(){
-
-	
-	//
-
 	mj.gameSets = mj.shuffleSets();
 	mj.readySets();
 	mj.displayCard(mj.mySets, 'me');
