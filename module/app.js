@@ -484,7 +484,14 @@ mj.next = function(position, draw){
 	} else {
 		mj[set].push(mj.gameSets.pop());
 		mj.refresh(position);
+		mj.displayPong(mj['Pong'+set],position);
 	}
+
+	if(mj.winningHand(position,set)){
+		alert(position+' win!');
+		return;
+	}
+
 	var index = mj.nextAI(position, set)[0].cardIndex;
 
 	if(typeof index !== 'number') return;
@@ -513,6 +520,10 @@ mj.next = function(position, draw){
 					mj.mySets.push(mj.gameSets.pop());
 					mj.refresh('me');
 					mj.displayPong(mj['PongmySets'],'me');
+					if(mj.winningHand('me','mySets')){
+						alert(position+' win!');
+						return;
+					}
 				} else if (position === 'up') {
 					mj.currentPos = 'left';
 					mj.next('left');
