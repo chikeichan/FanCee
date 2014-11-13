@@ -379,7 +379,7 @@ mj.listenPong = function(position){
 					mj.refresh('me');
 					mj.displayPong(mj['PongmySets'],'me');
 					if(mj.winningHand('me','mySets')|| mj.winningHand('me','mySets',true)){
-						alert(position+' win!');
+						alert('You win!');
 						return;
 					}
 				} else if (mj.currentPos === 'up') {
@@ -423,7 +423,7 @@ mj.listenKong = function(position){
 					mj.refresh('me');
 					mj.displayPong(mj['PongmySets'],'me');
 					if(mj.winningHand('me','mySets')|| mj.winningHand('me','mySets',true)){
-						alert(position+' win!');
+						alert('You win!');
 						return;
 					}
 				} else if (mj.currentPos === 'up') {
@@ -721,7 +721,11 @@ mj.winningHand = function(position,set,reverse){
 
 };
 
-mj.test = ["man-3", "man-4", "man-4",  "man-4","man-4", "man-5", "man-5","man-5","man-6", "man-6", "man-6", "man-7","man-7","man-8"]
+mj.test = ["bamboo-4", "bamboo-4", "bamboo-5", 
+					"bamboo-5","bamboo-6", "bamboo-6", 
+					"man-3","man-3","pin-1", 
+					"pin-1", "pin-2", "pin-2",
+					"pin-3","pin-3"]
 
 //Main recursive logic to execute next round of playing until there are only 4
 //cards left in the gamesets
@@ -855,7 +859,7 @@ $(document).ready(function(){
 					mj.refresh('me');
 					mj.displayPong(mj['PongmySets'],'me');
 					if(mj.winningHand('me','mySets')|| mj.winningHand('me','mySets',true)){
-						alert(position+' win!');
+						alert('you win!');
 						return;
 					}
 				} else if (mj.currentPos === 'up') {
