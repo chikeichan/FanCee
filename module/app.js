@@ -325,10 +325,143 @@ mj.nextAI = function(position, set){
 		return x.cardVal;
 	});
 
+	return lowest;
+};
 
-	console.log(lowest[0]);
-	return lowest[0].cardIndex;
-}
+mj.winningHand = function(position,set){
+	var result = false;
+	var theSet = {};
+	var pair= [];
+	var threes = [];
+	var seq = [];
+	var winHand = [];
+
+	var AISets = mj.nextAI(position,set);
+	var AISets = _.groupBy(AISets,function(tile){
+		return tile.cardType;
+	})
+
+	
+	//Get Grouped Sets
+	_.each(AISets,function(typeArray,type){
+		theSet[type]=[];
+		_.each(typeArray,function(tile){
+			theSet[type].push(tile.cardNum);
+		})
+		theSet[type] = _.sortBy(theSet[type],function(num){
+			return num;
+		})
+	})
+
+	//Get Sequence First
+	_.each(theSet,function(typeArray,type){
+		var seqCheck = _.uniq(typeArray);
+		var seqArray = [];
+		var preValue = seqCheck[0];
+		var seqTimes = 1;
+
+		for(var i=1;i<seqCheck.length;i++){
+			if(+preValue+1 == seqCheck[i]){
+				preValue = seqCheck[i];
+				seqTimes++;
+				if(seqTimes === 3){
+					seq.push(type+'-'+(preValue-2));
+					seq.push(type+'-'+(preValue-1));
+					seq.push(type+'-'+preValue);
+					seqTimes = 0
+					preValue = null;
+				}
+			} else {
+				preValue = seqCheck[i];
+				seqTimes = 1;
+			}
+		}
+	})
+
+	var setArray = mj[set].slice();
+
+	_.each(seq,function(set){
+
+		var dup = false;
+		_.each(setArray,function(mySet,i){
+			if(mySet === set && dup === false){
+				setArray.splice(i,1);
+				dup=true;
+			}
+		})
+	});
+
+	
+
+	var lastValue = setArray[0];
+	var repeat = 1;
+	for(var i=1;i<setArray.length;i++){
+		if(setArray[i]===lastValue){
+			repeat++;
+			lastValue = setArray[i];
+			if(repeat === 3){
+				threes.push(setArray[i]);
+				threes.push(setArray[i]);
+				threes.push(setArray[i]);
+				lastValue = null;
+				repeat = 0;
+			}
+		} else {
+			lastValue = setArray[i];
+			repeat = 1;
+		}
+	}
+
+	_.each(threes,function(set){
+		var dup = false;
+
+		_.each(setArray,function(mySet,i){
+			if(mySet === set && dup === false){
+				setArray.splice(i,1);
+				dup=true;
+			}
+		})
+	});
+
+	//
+	var lastValue = setArray[0];
+	var repeat = 1;
+	for(var i=1;i<setArray.length;i++){
+		if(setArray[i]===lastValue){
+			repeat++;
+			lastValue = setArray[i];
+			if(repeat === 2){
+				pair.push(setArray[i]);
+				pair.push(setArray[i]);
+				lastValue = null;
+				repeat = 0;
+			}
+		} else {
+			lastValue = setArray[i];
+			repeat = 1;
+		}
+	}
+
+	_.each(pair,function(set){
+		var dup = false;
+
+		_.each(setArray,function(mySet,i){
+			if(mySet === set && dup === false){
+				setArray.splice(i,1);
+				dup=true;
+			}
+		})
+	});
+
+	console.log(seq);
+	console.log(threes);
+	console.log(pair);
+
+	console.log(setArray);
+	return setArray.length === 0;
+
+};
+
 
 
 //Main recursive logic to execute next round of playing until there are only 4
@@ -352,7 +485,7 @@ mj.next = function(position, draw){
 		mj[set].push(mj.gameSets.pop());
 		mj.refresh(position);
 	}
-	var index = mj.nextAI(position, set);
+	var index = mj.nextAI(position, set)[0].cardIndex;
 
 	if(typeof index !== 'number') return;
 
