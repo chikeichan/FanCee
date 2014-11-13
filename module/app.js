@@ -96,7 +96,53 @@ mj.readySets = function(sets){
 }
 
 //Rendering =======================================================================
+mj.displayGameSets = function(){
+	var mStack = 0;
+	var rStack = 0;
+	var uStack = 0;
+	var lStack = 0;
+	var max = mj.gameSets.length < 24 ? mj.gameSets.length : 24;
+	var max2 = mj.gameSets.length < 48 ? mj.gameSets.length : 48;
+	var max3 = mj.gameSets.length < 72 ? mj.gameSets.length : 72;
 
+
+	for(var i=0;i<max;i++){
+		rStack++;
+	}
+	for(var i=24;i<max2;i++){
+		uStack++;
+	}
+	for(var i=48;i<max3;i++){
+		lStack++;
+	}
+	for(var i=72;i<mj.gameSets.length;i++){
+		mStack++;
+	}
+
+	var fillStack = function(stack,pos){
+		var $pos = $('div#'+pos);
+		$pos.html('')
+
+		if(pos!=='gme'){
+			for (var i=0; i<stack; i++){
+				var mj = '<img id="'+pos+'" src="../graphics/facedown.png"></img>';
+				$pos.append(mj);
+			}
+		} else {
+			for (var i=0; i<stack; i++){
+				var mj = '<img id="'+pos+'" src="../graphics/facedown.png"></img>';
+				$pos.append(mj);
+			}
+		}
+	}
+
+
+	fillStack(rStack,'gright');
+	fillStack(uStack,'gup');
+	fillStack(lStack,'gleft');
+	fillStack(mStack,'gme');
+
+}
 
 
 
@@ -128,7 +174,9 @@ mj.displayPong = function(set, position) {
 		var mj = '<img id="p'+position+'" src="../graphics/'+set[i]+'.png"></img>';
 		$pos.prepend(mj);
 	}
+
 }
+
 
 
 //Refresh rendering for me, right, up, left, or field.
@@ -155,7 +203,7 @@ mj.refresh = function(position){
 			$('div#field').append('<img id="field" src="../graphics/'+set+'.png"></img>');
 		});
 	} else {
-		mj.displayCard(mj[set], position,false);
+		mj.displayCard(mj[set], position,true);
 	}
 }
 
@@ -200,6 +248,7 @@ mj.ifPause = function(position){
 		playerPause = 'me'
 	}
 
+	console.log(pause)
 	return [pause, playerPause];
 }
 
@@ -209,9 +258,12 @@ mj.pongAI = function(position){
 	return true;
 }
 
+mj.kongAI = function(position){
+	return 'kong';
+}
 
 //Execute Pong sequence
-mj.pong = function(position){
+mj.pong = function(position, addOneBack){
 	var set;
 	if(position === 'right'){
 			set = 'rSets';
@@ -230,6 +282,10 @@ mj.pong = function(position){
 	mj['Pong'+set].push(slastSet);
 	mj['Pong'+set].push(slastSet);
 	mj['Pong'+set].push(slastSet);
+
+	if(addOneBack){
+		mj[set].push(slastSet);
+	}
 	
 	mj.refresh(position);
 	mj.displayPong(mj['Pong'+set],position);
@@ -247,6 +303,57 @@ mj.pong = function(position){
 				mj.next('up',false);
 			} else if (position === 'me') {
 				mj.currentPos = 'me';
+			}
+	},500);
+
+}
+
+//Execute PKng sequence
+mj.kong = function(position){
+	var set;
+	if(position === 'right'){
+			set = 'rSets';
+	} else if (position === 'left'){
+		set = 'lSets';
+	} else if (position === 'up') {
+		set = 'uSets';
+	} else if (position === 'me') {
+		set = 'mySets';
+	}
+
+	var slastSet = mj.playedSets.pop()
+
+	mj[set] = _.without(mj[set],slastSet);
+
+	mj['Pong'+set].push(slastSet);
+	mj['Pong'+set].push(slastSet);
+	mj['Pong'+set].push(slastSet);
+	mj['Pong'+set].push(slastSet);
+	
+	mj.refresh(position);
+	mj.displayPong(mj['Pong'+set],position);
+	mj.refresh('field');
+
+	_.delay(function(){
+			if(position === 'right'){
+				mj.currentPos === 'right';
+				mj.next('right',true);
+			} else if (position === 'left'){
+				mj.currentPos = 'left';
+				mj.next('left',true);
+			} else if (position === 'up') {
+				mj.currentPos = 'up';
+				mj.next('up',true);
+			} else if (position === 'me') {
+				mj.currentPos = 'me';
+				mj.mySets.push(mj.gameSets.pop());
+				mj.displayGameSets();
+				mj.refresh('me');
+				mj.displayPong(mj['PongmySets'],'me');
+				if(mj.winningHand('me','mySets')|| mj.winningHand('me','mySets',true)){
+					alert('You win!');
+					return;
+				}
 			}
 	},500);
 
@@ -286,6 +393,51 @@ mj.listenPong = function(position){
 		},500);
 	}
 } else {
+		mj.addOneBack = false;
+		$('div#panel').fadeIn(200);
+	}
+}
+
+//When a pause is caused by Pong scenario, listen for Kong executive command.
+mj.listenKong = function(position){
+	var lastSet = mj.playedSets[mj.playedSets.length-1];
+
+	if(position!=='me'){
+		if(mj.kongAI(position)==='pong'){
+
+			mj.pong(position, true);
+
+		} else if(mj.kongAI(position)==='kong'){
+
+			mj.kong(position);
+
+		} else {
+		_.delay(function(){
+			if(mj.gameSets.length > 4) {
+				if(mj.currentPos === 'right'){
+					mj.currentPos === 'up';
+					mj.next('up');
+				} else if (mj.currentPos === 'left'){
+					mj.currentPos = 'me';
+					mj.mySets.push(mj.gameSets.pop());
+					mj.refresh('me');
+					mj.displayPong(mj['PongmySets'],'me');
+					if(mj.winningHand('me','mySets')|| mj.winningHand('me','mySets',true)){
+						alert(position+' win!');
+						return;
+					}
+				} else if (mj.currentPos === 'up') {
+					mj.currentPos = 'left';
+					mj.next('left');
+				} else if (mj.currentPos ==='me') {
+					mj.currentPos = 'right';
+					mj.next('right');
+				}
+			}
+		},500);
+	}
+} else {
+		mj.addOneBack = true;
 		$('div#panel').fadeIn(200);
 	}
 }
@@ -560,7 +712,12 @@ mj.winningHand = function(position,set,reverse){
 	console.log('Threes             : '+threes);
 	console.log('Pair               : '+pair);
 	console.log('Rest of the card   : '+setArray);
-	return setArray.length === 0;
+	
+	if(setArray.length === 0 && pair.length === 2){
+		return true;
+	} else {
+		return false;
+	}
 
 };
 
@@ -585,6 +742,7 @@ mj.next = function(position, draw){
 
 	} else {
 			mj[set].push(mj.gameSets.pop());
+			mj.displayGameSets();
 			mj.refresh(position);
 			mj.displayPong(mj['Pong'+set],position);
 			if(mj.winningHand(position,set) || mj.winningHand(position,set,true)){
@@ -612,6 +770,8 @@ mj.next = function(position, draw){
 
 	if(mj.ifPause(position)[0]==='pong'){
 		mj.listenPong(mj.ifPause(position)[1]);
+	} else if(mj.ifPause(position)[0]==='kong'){
+		mj.listenKong(mj.ifPause(position)[1]);
 	} else {
 		_.delay(function(){
 			if(mj.gameSets.length > 4) {
@@ -621,6 +781,8 @@ mj.next = function(position, draw){
 				} else if (position === 'left'){
 					mj.currentPos = 'me';
 					mj.mySets.push(mj.gameSets.pop());
+					mj.displayGameSets();
+					
 					mj.refresh('me');
 					mj.displayPong(mj['PongmySets'],'me');
 					if(mj.winningHand('me','mySets')|| mj.winningHand('me','mySets',true)){
@@ -643,10 +805,11 @@ mj.next = function(position, draw){
 $(document).ready(function(){
 	mj.gameSets = mj.shuffleSets();
 	mj.readySets();
-	mj.displayCard(mj.mySets, 'me',true);
-	mj.displayCard(mj.rSets, 'right');
-	mj.displayCard(mj.uSets, 'up');
-	mj.displayCard(mj.lSets, 'left');
+	mj.displayGameSets();
+	mj.refresh('me');
+	mj.refresh('left');
+	mj.refresh('right');
+	mj.refresh('up');
 
 	$(document).on('mouseenter','img#me',function(){
 		$(this).stop().animate({
@@ -669,8 +832,14 @@ $(document).ready(function(){
 	});
 
 	$(document).on('click', 'div#Pong', function(){
-		mj.pong('me');
+		mj.pong('me',mj.addOneBack);
 		$('div#panel').fadeOut(200);
+	})
+	$(document).on('click', 'div#Kong', function(){
+		if(mj.addOneBack){
+			mj.kong('me');
+			$('div#panel').fadeOut(200);
+		}
 	})
 
 	$(document).on('click', 'div#Null', function(){

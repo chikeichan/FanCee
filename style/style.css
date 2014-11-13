@@ -40,7 +40,7 @@ div#right {
 	width: 550px;
 	height: 50px;
 	position: absolute;
-	top: 315px;
+	top: 325px;
 	right: -220px;
 	transform: rotate(270deg);
 }
@@ -65,7 +65,14 @@ img {
 	z-index: 3;
 }
 
-img#me, img#field {
+img#me {
+	position: relative;
+	margin-left: -16px;
+	width: 51px;
+	z-index: 4;
+}
+
+img#field {
 	position: relative;
 	margin-left: -12px;
 	width: 51px;
@@ -73,22 +80,25 @@ img#me, img#field {
 
 img#left {
 	width: 51px;
-	margin-left: -12px;
+	margin-left: -16px;
+	z-index: 4;
 }
 
 img#right {
 	width: 51px;
-	margin-left: -12px;
+	margin-left: -16px;
+	z-index: 4;
 }
 
 img#up {
 	width: 51px;
-	margin-left: -12px;
+	margin-left: -16px;
+	z-index: 4;
 }
 
 img#pme {
 	position: relative;
-	margin-left: -12px;
+	margin-left: -18px;
 	margin-bottom: -11px;
 	width: 51px;
 }
@@ -96,18 +106,18 @@ img#pme {
 img#pleft {
 	width: 51px;
 	margin-bottom: -22px;
-	margin-left: -12px;
+	margin-left: -18px;
 }
 
 img#pright {
 	width: 51px;
 	margin-bottom: -22px;
-	margin-left: -12px;
+	margin-left: -18px;
 }
 
 img#pup {
 	width: 51px;
-	margin-left: -12px;
+	margin-left: -18px;
 	margin-bottom: -11px;
 }
 
@@ -123,7 +133,7 @@ div#field {
 	height: 442px;
 	position: absolute;
 	top: 129px;
-	left: 156px;
+	left: 145px;
 }
 
 div#panel {
@@ -134,6 +144,7 @@ div#panel {
 	background: rgba(0, 0, 0, 0.52);
 	border-radius: 10px;
 	top: -172px;
+	z-index: 5;
 	display: none;
 }
 
@@ -169,4 +180,68 @@ div#panel div#Null {
 	margin: 28px 0 0 20px;
 	font-family: Delius Unicase;
 	border-radius: 20px;
+}
+
+div#gme {
+	width: 410px;
+	height: 50px;
+	position: absolute;
+	top: 575px;
+	left: 145px;
+}
+
+div#gleft {
+	width: 439px;
+	height: 50px;
+	position: absolute;
+	top: 325px;
+	left: -105px;
+	transform: rotate(90deg);
+}
+
+div#gright {
+	width: 439px;
+	height: 50px;
+	position: absolute;
+	top: 325px;
+	right: -107px;
+	transform: rotate(270deg);
+}
+
+div#gup {
+	width: 410px;
+	height: 50px;
+	position: absolute;
+	top: 74px;
+	left: 145px;
+	transform: rotate(180deg);
+}
+
+img#gme {
+	position: relative;
+	margin-left: -34px;
+	margin-bottom: 0px;
+	width: 51px;
+	float: left;
+}
+
+img#gleft {
+	width: 51px;
+	margin-bottom: 0px;
+	margin-left: -33px;
+	float: left;
+}
+
+img#gright {
+	width: 51px;
+	margin-bottom: 0px;
+	margin-left: -33px;
+	float: left;
+}
+
+img#gup {
+	width: 51px;
+	margin-bottom: 0px;
+	margin-left: -34px;
+	float: left;
 }
