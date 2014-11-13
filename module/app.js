@@ -80,6 +80,9 @@ mj.PonglSets = [];
 //Starting at player's position, each position takes turn getting a card counter clockwise
 //until player has 14 card.
 mj.readySets = function(sets){
+	//mj.displayGameSets();
+
+
 	while(this.gameSets.length > 83){
 		this.mySets.push(this.gameSets.pop());
 		if(this.mySets.length>13) {return};
@@ -93,23 +96,28 @@ mj.readySets = function(sets){
 }
 
 //Rendering =======================================================================
-//Display sets face up for one player
-mj.displayCard = function(set, position){
-	var $pos = $('div#'+position);
-	set.sort();
-	for (var i=0; i<set.length; i++){
-		var mj = '<img id="'+position+'" src="../graphics/'+set[i]+'.png"></img>';
-		$pos.append(mj);
-	}
-}
 
-//Display sets face down for opponents
-mj.displayOpponents = function(set, position) {
+
+
+
+
+
+
+//Display sets face up for one player
+mj.displayCard = function(set, position,faceUp){
 	var $pos = $('div#'+position);
 	set.sort();
-	for (var i=0; i<set.length; i++){
-		var mj = '<img id="'+position+'" src="../graphics/'+set[i]+'.png"></img>';
-		$pos.append(mj);
+
+	if(faceUp){
+		for (var i=0; i<set.length; i++){
+			var mj = '<img id="'+position+'" src="../graphics/'+set[i]+'.png"></img>';
+			$pos.append(mj);
+		}
+	} else {
+		for (var i=0; i<set.length; i++){
+			var mj = '<img id="'+position+'" src="../graphics/facedown.png"></img>';
+			$pos.append(mj);
+		}
 	}
 }
 
@@ -141,13 +149,13 @@ mj.refresh = function(position){
 
 	$pos.html('');
 	if(set === 'mySets'){
-		mj.displayCard(mj[set], position);
+		mj.displayCard(mj[set], position,true);
 	} else if (set === 'field') {
 		_.each(mj.playedSets, function(set){
 			$('div#field').append('<img id="field" src="../graphics/'+set+'.png"></img>');
 		});
 	} else {
-		mj.displayOpponents(mj[set], position);
+		mj.displayCard(mj[set], position,false);
 	}
 }
 
@@ -635,10 +643,10 @@ mj.next = function(position, draw){
 $(document).ready(function(){
 	mj.gameSets = mj.shuffleSets();
 	mj.readySets();
-	mj.displayCard(mj.mySets, 'me');
-	mj.displayOpponents(mj.rSets, 'right');
-	mj.displayOpponents(mj.uSets, 'up');
-	mj.displayOpponents(mj.lSets, 'left');
+	mj.displayCard(mj.mySets, 'me',true);
+	mj.displayCard(mj.rSets, 'right');
+	mj.displayCard(mj.uSets, 'up');
+	mj.displayCard(mj.lSets, 'left');
 
 	$(document).on('mouseenter','img#me',function(){
 		$(this).stop().animate({
