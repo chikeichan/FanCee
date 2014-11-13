@@ -249,8 +249,33 @@ mj.listenPong = function(position){
 	if(position!=='me'){
 		if(mj.pongAI(position)){
 			mj.pong(position);
-		}
-	} else {
+		} else {
+		_.delay(function(){
+			if(mj.gameSets.length > 4) {
+				if(mj.currentPos === 'right'){
+					mj.currentPos === 'up';
+					mj.next('up');
+				} else if (mj.currentPos === 'left'){
+					mj.currentPos = 'me';
+					mj.mySets.push(mj.gameSets.pop());
+					mj.refresh('me');
+					mj.displayPong(mj['PongmySets'],'me');
+					if(mj.winningHand('me','mySets')|| mj.winningHand('me','mySets',true)){
+						alert(position+' win!');
+						return;
+					}
+				} else if (mj.currentPos === 'up') {
+					mj.currentPos = 'left';
+					mj.next('left');
+				} else if (mj.currentPos ==='me') {
+					mj.currentPos = 'right';
+					mj.next('right');
+				}
+			}
+		},500);
+	}
+}
+	else {
 		$('div#panel').fadeIn(200);
 	}
 }
@@ -328,7 +353,7 @@ mj.nextAI = function(position, set){
 	return lowest;
 };
 
-mj.winningHand = function(position,set){
+mj.winningHand = function(position,set,reverse){
 	var result = false;
 	var theSet = {};
 	var pair= [];
@@ -338,51 +363,7 @@ mj.winningHand = function(position,set){
 	var winHand = [];
 
 	//Get Seq first
-	var seqArray = _.uniq(mj[set]);
-
-	var preValue = seqArray[0];
-	var seqTimes = 1;
-
-	for(var i=1;i<seqArray.length;i++){
-		var selectKey = seqArray[i].split('-')[0];
-		var selectProp = seqArray[i].split('-')[1];
-		var compareKey = preValue.split('-')[0];
-		var compareProp = preValue.split('-')[1];
-
-		if(selectKey === compareKey){
-			if(selectProp-1 === +compareProp){
-				seqTimes++;
-				preValue = seqArray[i];
-				if(seqTimes===3){
-					seq.push(seqArray[i-2]);
-					seq.push(seqArray[i-1]);
-					seq.push(seqArray[i]);
-					seqTimes = 0
-					preValue = '-';
-				}
-			} else {
-				seqTimes = 1;
-				preValue = seqArray[i];
-			}
-		} else {
-			seqTimes = 1;
-			preValue = seqArray[i];
-		}
-	}
-
-	//Take out Seq sets from original array
 	var setArray = mj[set].slice();
-
-	_.each(seq,function(set){
-
-		var dup = false;
-		_.each(setArray,function(mySet,i){
-			if(mySet === set && dup === false){
-				setArray.splice(i,1);
-				dup=true;
-			}
-		})
-	});
 
 	var sequenize = function(){
 	
@@ -436,9 +417,72 @@ mj.winningHand = function(position,set){
 		})
 	}
 
-	sequenize();
-	sequenize();
-	sequenize();
+	var revsequenize = function(){
+	
+		//Get Seq 
+		seq2 = [];
+		setArray.reverse();
+		var seqArray = _.uniq(setArray);
+
+		var preValue = seqArray[0];
+		var seqTimes = 1;
+
+		for(var i=1;i<seqArray.length;i++){
+			var selectKey = seqArray[i].split('-')[0];
+			var selectProp = seqArray[i].split('-')[1];
+			var compareKey = preValue.split('-')[0];
+			var compareProp = preValue.split('-')[1];
+
+			if(selectKey === compareKey){
+				if(+selectProp === +compareProp-1){
+					seqTimes++;
+					preValue = seqArray[i];
+					if(seqTimes===3){
+						seq2.push(seqArray[i-2]);
+						seq2.push(seqArray[i-1]);
+						seq2.push(seqArray[i]);
+						seqTimes = 0
+						preValue = '-';
+					}
+				} else {
+					seqTimes = 1;
+					preValue = seqArray[i];
+				}
+			} else {
+				seqTimes = 1;
+				preValue = seqArray[i];
+			}
+		}
+		//Take out Seq sets from original array
+
+		_.each(seq2,function(set){
+			var dup = false;
+			_.each(setArray,function(mySet,i){
+				if(mySet === set && dup === false){
+					setArray.splice(i,1);
+					dup=true;
+				}
+			})
+		});
+
+		_.each(seq2,function(x){
+			seq.push(x);
+		})
+	}
+
+	if(reverse){
+		revsequenize();
+		revsequenize();
+		revsequenize();
+		revsequenize();
+		revsequenize();
+	} else {
+		sequenize();
+		sequenize();
+		sequenize();
+		sequenize();
+		sequenize();
+	}
 
 
 	var lastValue = setArray[0];
@@ -510,11 +554,7 @@ mj.winningHand = function(position,set){
 
 };
 
-mj.test = ["bamboo-4", "bamboo-5", "bamboo-6",
-					 "man-1", "man-1",
-					 "bamboo-4", "bamboo-5", "bamboo-6",
-					 "wind-east", "wind-east","wind-east",
-					 "bamboo-4", "bamboo-5", "bamboo-6"]
+mj.test = ["man-3", "man-4", "man-4",  "man-4","man-4", "man-5", "man-5","man-5","man-6", "man-6", "man-6", "man-7","man-7","man-8"]
 
 //Main recursive logic to execute next round of playing until there are only 4
 //cards left in the gamesets
@@ -534,15 +574,16 @@ mj.next = function(position, draw){
 	if(draw === false) {
 
 	} else {
-		mj[set].push(mj.gameSets.pop());
-		mj.refresh(position);
-		mj.displayPong(mj['Pong'+set],position);
+			mj[set].push(mj.gameSets.pop());
+			mj.refresh(position);
+			mj.displayPong(mj['Pong'+set],position);
+			if(mj.winningHand(position,set) || mj.winningHand(position,set,true)){
+			alert(position+' win!');
+			return;
+		}
 	}
 
-	if(mj.winningHand(position,set)){
-		alert(position+' win!');
-		return;
-	}
+	
 
 	var index = mj.nextAI(position, set)[0].cardIndex;
 
@@ -572,8 +613,8 @@ mj.next = function(position, draw){
 					mj.mySets.push(mj.gameSets.pop());
 					mj.refresh('me');
 					mj.displayPong(mj['PongmySets'],'me');
-					if(mj.winningHand('me','mySets')){
-						alert(position+' win!');
+					if(mj.winningHand('me','mySets')|| mj.winningHand('me','mySets',true)){
+						alert('You win!');
 						return;
 					}
 				} else if (position === 'up') {
@@ -619,6 +660,35 @@ $(document).ready(function(){
 
 	$(document).on('click', 'div#Pong', function(){
 		mj.pong('me');
+		$('div#panel').fadeOut(200);
+	})
+
+	$(document).on('click', 'div#Null', function(){
+
+		_.delay(function(){
+			if(mj.gameSets.length > 4) {
+				if(mj.currentPos === 'right'){
+					mj.currentPos === 'up';
+					mj.next('up');
+				} else if (mj.currentPos === 'left'){
+					mj.currentPos = 'me';
+					mj.mySets.push(mj.gameSets.pop());
+					mj.refresh('me');
+					mj.displayPong(mj['PongmySets'],'me');
+					if(mj.winningHand('me','mySets')|| mj.winningHand('me','mySets',true)){
+						alert(position+' win!');
+						return;
+					}
+				} else if (mj.currentPos === 'up') {
+					mj.currentPos = 'left';
+					mj.next('left');
+				} else if (mj.currentPos ==='me') {
+					mj.currentPos = 'right';
+					mj.next('right');
+				}
+			}
+		},500);
+
 		$('div#panel').fadeOut(200);
 	})
 

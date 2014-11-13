@@ -166,3 +166,15 @@ a {
 a:active {
 	font-size: 15px;
 }
+
+div#panel div#Null {
+	position: absolute;
+	top: -21px;
+	left: 203px;
+	font-size: 15px;
+	width: 20px;
+	height: 20px;
+	margin: 28px 0 0 20px;
+	font-family: Delius Unicase;
+	border-radius: 20px;
+}
