@@ -155,8 +155,8 @@ mj.refresh = function(position){
 //Game Logic ====================================================================
 //Analyzed recently played set to see if a pause is needed.
 mj.ifPause = function(position){
-	var pong = false;
-	var playerPong;
+	var pause = false;
+	var playerPause;
 	var lastSet = mj.playedSets[mj.playedSets.length-1];
 	var players;
 		if(position === 'right'){
@@ -174,22 +174,25 @@ mj.ifPause = function(position){
 			return set === lastSet;
 		});
 		if(dup.length === 2){
-			pong = true;
-			playerPong = player;
-		};
+			pause = 'pong';
+			playerPause = player;
+		} else if (dup.length === 3){
+			pause = 'kong';
+			playerPause = player;
+		}
 	});
 
-	if(playerPong === 'lSets'){
-		playerPong = 'left'
-	} else if(playerPong === 'rSets'){
-		playerPong = 'right'
-	} else if(playerPong === 'uSets'){
-		playerPong = 'up'
-	} else if(playerPong === 'mySets'){
-		playerPong = 'me'
+	if(playerPause === 'lSets'){
+		playerPause = 'left'
+	} else if(playerPause === 'rSets'){
+		playerPause = 'right'
+	} else if(playerPause === 'uSets'){
+		playerPause = 'up'
+	} else if(playerPause === 'mySets'){
+		playerPause = 'me'
 	}
 
-	return [pong, playerPong];
+	return [pause, playerPause];
 }
 
 
@@ -274,8 +277,7 @@ mj.listenPong = function(position){
 			}
 		},500);
 	}
-}
-	else {
+} else {
 		$('div#panel').fadeIn(200);
 	}
 }
@@ -600,7 +602,7 @@ mj.next = function(position, draw){
 	mj.displayPong(mj['Pong'+set],position);
 
 
-	if(mj.ifPause(position)[0]){
+	if(mj.ifPause(position)[0]==='pong'){
 		mj.listenPong(mj.ifPause(position)[1]);
 	} else {
 		_.delay(function(){
