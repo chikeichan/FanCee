@@ -1,7 +1,7 @@
 var mj = {};
 
-//Initialize Sets ==============================================
 
+//Initialize Sets ==============================================
 //Original Full Sets
 mj.fullSets = {
 	bamboo : {
@@ -92,6 +92,7 @@ mj.readySets = function(sets){
 	}
 }
 
+//Rendering =======================================================================
 //Display sets face up for one player
 mj.displayCard = function(set, position){
 	var $pos = $('div#'+position);
@@ -121,6 +122,37 @@ mj.displayPong = function(set, position) {
 	}
 }
 
+
+//Refresh rendering for me, right, up, left, or field.
+mj.refresh = function(position){
+	var $pos = $('div#'+position);
+	var set;
+	if(position === 'right'){
+		set = 'rSets';
+	} else if (position === 'left'){
+		set = 'lSets';
+	} else if (position === 'up') {
+		set = 'uSets';
+	} else if (position === 'me') {
+		set = 'mySets';
+	} else if (position === 'field'){
+		set = 'field';
+	}
+
+	$pos.html('');
+	if(set === 'mySets'){
+		mj.displayCard(mj[set], position);
+	} else if (set === 'field') {
+		_.each(mj.playedSets, function(set){
+			$('div#field').append('<img id="field" src="../graphics/'+set+'.png"></img>');
+		});
+	} else {
+		mj.displayOpponents(mj[set], position);
+	}
+}
+
+
+//Game Logic ====================================================================
 //Analyzed recently played set to see if a pause is needed.
 mj.ifPause = function(position){
 	var pong = false;
@@ -232,34 +264,20 @@ mj.readSet = function(set){
 	return set.split('-');
 };
 
+var sound = new buzz.sound('../wood.mp3');
+var sound2 = new buzz.sound('../wood.mp3');
 
-//Refresh rendering for me, right, up, left, or field.
-mj.refresh = function(position){
-	var $pos = $('div#'+position);
-	var set;
-	if(position === 'right'){
-		set = 'rSets';
-	} else if (position === 'left'){
-		set = 'lSets';
-	} else if (position === 'up') {
-		set = 'uSets';
-	} else if (position === 'me') {
-		set = 'mySets';
-	} else if (position === 'field'){
-		set = 'field';
-	}
-
-	$pos.html('');
-	if(set === 'mySets'){
-		mj.displayCard(mj[set], position);
-	} else if (set === 'field') {
-		_.each(mj.playedSets, function(set){
-			$('div#field').append('<img id="field" src="../graphics/'+set+'.png"></img>');
-		});
+var preSound = true;
+var playWood = function(){
+	if(preSound){
+		sound.play();
+		preSound = false;
 	} else {
-		mj.displayOpponents(mj[set], position);
+		sound2.play();
+		preSound = true;
 	}
 }
+
 
 //Main recursive logic to execute next round of playing until there are only 4
 //cards left in the gamesets
@@ -285,6 +303,8 @@ mj.next = function(position, draw){
 
 	var playedSet = mj[set].splice(5,1)[0]
 	mj.playedSets.push(playedSet);
+
+	playWood();
 
 	mj.refresh('field');
 	mj.refresh(position);
@@ -318,6 +338,10 @@ mj.next = function(position, draw){
 
 //DOM Manipulation and Interactions
 $(document).ready(function(){
+
+	
+	//
+
 	mj.gameSets = mj.shuffleSets();
 	mj.readySets();
 	mj.displayCard(mj.mySets, 'me');
@@ -361,6 +385,9 @@ $(document).ready(function(){
 			})
 			mj.mySets.splice(index,1);
 			mj.playedSets.push(setStr);
+
+			playWood();
+
 			mj.refresh('field');
 			mj.refresh('me');
 			mj.displayPong(mj['PongmySets'],'me');
