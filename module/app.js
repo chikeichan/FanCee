@@ -384,59 +384,62 @@ mj.winningHand = function(position,set){
 		})
 	});
 
-	//Get Seq second
-	var seqArray = _.uniq(setArray);
+	var sequenize = function(){
+	
+		//Get Seq 
+		seq2 = [];
+		var seqArray = _.uniq(setArray);
 
-	var preValue = seqArray[0];
-	var seqTimes = 1;
+		var preValue = seqArray[0];
+		var seqTimes = 1;
 
-	for(var i=1;i<seqArray.length;i++){
-		var selectKey = seqArray[i].split('-')[0];
-		var selectProp = seqArray[i].split('-')[1];
-		var compareKey = preValue.split('-')[0];
-		var compareProp = preValue.split('-')[1];
+		for(var i=1;i<seqArray.length;i++){
+			var selectKey = seqArray[i].split('-')[0];
+			var selectProp = seqArray[i].split('-')[1];
+			var compareKey = preValue.split('-')[0];
+			var compareProp = preValue.split('-')[1];
 
-		if(selectKey === compareKey){
-			if(selectProp-1 === +compareProp){
-				seqTimes++;
-				preValue = seqArray[i];
-				if(seqTimes===3){
-					seq2.push(seqArray[i-2]);
-					seq2.push(seqArray[i-1]);
-					seq2.push(seqArray[i]);
-					seqTimes = 0
-					preValue = '-';
+			if(selectKey === compareKey){
+				if(selectProp-1 === +compareProp){
+					seqTimes++;
+					preValue = seqArray[i];
+					if(seqTimes===3){
+						seq2.push(seqArray[i-2]);
+						seq2.push(seqArray[i-1]);
+						seq2.push(seqArray[i]);
+						seqTimes = 0
+						preValue = '-';
+					}
+				} else {
+					seqTimes = 1;
+					preValue = seqArray[i];
 				}
 			} else {
 				seqTimes = 1;
 				preValue = seqArray[i];
 			}
-		} else {
-			seqTimes = 1;
-			preValue = seqArray[i];
 		}
+		//Take out Seq sets from original array
+
+		_.each(seq2,function(set){
+			var dup = false;
+			_.each(setArray,function(mySet,i){
+				if(mySet === set && dup === false){
+					setArray.splice(i,1);
+					dup=true;
+				}
+			})
+		});
+
+		_.each(seq2,function(x){
+			seq.push(x);
+		})
 	}
 
-	//Take out Seq sets from original array
+	sequenize();
+	sequenize();
+	sequenize();
 
-	_.each(seq2,function(set){
-
-		var dup = false;
-		_.each(setArray,function(mySet,i){
-			if(mySet === set && dup === false){
-				setArray.splice(i,1);
-				dup=true;
-			}
-		})
-	});
-
-	_.each(seq2,function(x){
-		seq.push(x);
-	})
-
-
-
-	
 
 	var lastValue = setArray[0];
 	var repeat = 1;
@@ -498,20 +501,20 @@ mj.winningHand = function(position,set){
 		})
 	});
 
-	console.log(seq);
-	console.log(threes);
-	console.log(pair);
-
-	console.log(setArray);
+	console.log(position+' ======================================================');
+	console.log('Seq                : '+seq);
+	console.log('Threes             : '+threes);
+	console.log('Pair               : '+pair);
+	console.log('Rest of the card   : '+setArray);
 	return setArray.length === 0;
 
 };
 
 mj.test = ["bamboo-4", "bamboo-5", "bamboo-6",
 					 "man-1", "man-1",
-					 "pin-5", "pin-6", "pin-7",
+					 "bamboo-4", "bamboo-5", "bamboo-6",
 					 "wind-east", "wind-east","wind-east",
-					 "pin-4", "pin-5", "pin-6"]
+					 "bamboo-4", "bamboo-5", "bamboo-6"]
 
 //Main recursive logic to execute next round of playing until there are only 4
 //cards left in the gamesets
