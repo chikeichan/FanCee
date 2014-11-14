@@ -181,7 +181,7 @@ mj.displayPong = function(set, position) {
 
 }
 
-
+showOppo = false;
 
 //Refresh rendering for me, right, up, left, or field.
 mj.refresh = function(position){
@@ -207,7 +207,7 @@ mj.refresh = function(position){
 			$('div#field').append('<img id="field" src="../graphics/'+set+'.png"></img>');
 		});
 	} else {
-		mj.displayCard(mj[set], position,true);
+		mj.displayCard(mj[set], position,showOppo);
 	}
 }
 
@@ -731,7 +731,7 @@ mj.winningHand = function(position,set,reverse){
 
 mj.test = ["bamboo-4", "bamboo-4", "bamboo-5", 
 					"bamboo-5","bamboo-6", "bamboo-6", 
-					"man-3","man-3","pin-1",
+					"man-3","man-3","man-3",
 					"pin-3","pin-3"];
 mj.Pongtest = ['man-7','man-7','man-7'];
 
@@ -739,6 +739,14 @@ mj.Pongtest = ['man-7','man-7','man-7'];
 //Winning Screen
 mj.win = function(position,sets){
 	this.currentPos = 'win';
+	showOppo = true;
+	this.refresh('left');
+	this.refresh('right');
+	this.refresh('up');
+	this.displayPong(this['PonglSets'],'left');
+	this.displayPong(this['PongrSets'],'right');
+	this.displayPong(this['PonguSets'],'up');
+
 	$('#winning').show();
 	$('#wMsg').append(position+' Win!!');
 
@@ -802,37 +810,28 @@ mj.win = function(position,sets){
   			winnings = winnings +2;
   		}
   	} else if (position === 'right'){
-  		pot = pot.slice('-')[1];
+  		pot = jpot.slice('-')[1];
   		if(pot === '2' || pot === '6' || pot === 'east' || pot === 'chun'){
   			winnings = winnings +2;
   		}
   	} else if (position === 'up'){
-  		pot = pot.slice('-')[1];
+  		pot = jpot.slice('-')[1];
   		if(pot === '3' || pot === '7' || pot === 'south' || pot === 'green'){
   			winnings = winnings +2;
   		}
   	} else if (position === 'left'){
-  		pot = pot.slice('-')[1];
+  		pot = jpot.slice('-')[1];
   		if(pot === '4' || pot === '8' || pot === 'west' || pot === 'haku'){
   			winnings = winnings +2;
   		}
   	}
   })
 
-  var winds = ['me','right','left','up'];
+  var winds = ['me','right','up','left'];
 
   mj = this;
 
-  _.each(winds,function(pos){
-  	if(pos === position){
-  		mj[pos+'Points'] = mj[pos+'Points'] + winnings+ winnings+ winnings;
-
-  	} else {
-  		mj[pos+'Points'] = mj[pos+'Points'] - winnings;
-  	}
-  	console.log(pos+':'+mj[pos+'Points']);
-  	$('div#'+pos).append('<p id="point">'+mj[pos+'Points']+'</p>');
-  })
+  
 		
 	_.delay(function(){
 		$('.wSet').before(jp0);
@@ -850,7 +849,21 @@ mj.win = function(position,sets){
 		$('.wSet').before(jp3);
 	},2000)
 		
-	
+	_.delay(function(){	
+		_.each(winds,function(pos){
+	  	if(pos === position){
+	  		mj[pos+'Points'] = mj[pos+'Points'] + winnings+ winnings+ winnings;
+
+	  	} else {
+	  		mj[pos+'Points'] = mj[pos+'Points'] - winnings;
+	  	}
+	  	console.log(pos+':'+mj[pos+'Points']);
+	  	$('table#winning').append('<tr>'+
+	  													'<td>'+pos+'</td>'+
+	  													'<td id="number">'+mj[pos+"Points"]+'</td>'+
+	  													'</td>');
+	  })
+  },2500)
 
 }
 
@@ -926,7 +939,7 @@ mj.next = function(position, draw){
 					mj.next('left');
 				}
 			}
-		},500);
+		},700);
 	}
 }
 

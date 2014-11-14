@@ -35,7 +35,7 @@ div#winning {
 	width: 318px;
 	margin: 0 auto 0 auto;
 	position: relative;
-	top: 70px;
+	top: 5px;
 }
 .wSet > p {
 	display: inline-block;
@@ -46,11 +46,28 @@ div#winning {
 	margin-left: -18px;
 }
 
+table#winning {
+	border: 3px solid;
+	width: 215px;
+	margin: 25px auto 0 auto;
+	font-family: Fontdiner Swanky;
+	font-size: 25px;
+	padding: 0 20px 0 20px;
+}
+
+table#winning td {
+	text-align: left;
+}
+
+table#winning td#number {
+	text-align: right;
+}
+
 img#jackpot {
 	width: 90px;
 	margin: 0 0 0 -13px;
 	position: relative;
-	top: 46px;
+	top: -25px;
 	border-bottom: 4px solid;
 }
 
@@ -58,7 +75,7 @@ p#wMsg {
 	font-size: 57px;
 	font-family: Fontdiner Swanky;
 	position: relative;
-	top: 95px;
+	top: 15px;
 }
 
 div#me {
