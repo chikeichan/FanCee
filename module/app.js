@@ -810,17 +810,17 @@ mj.win = function(position,sets){
   			winnings = winnings +2;
   		}
   	} else if (position === 'right'){
-  		pot = jpot.slice('-')[1];
+  		pot = jpot.split('-')[1];
   		if(pot === '2' || pot === '6' || pot === 'east' || pot === 'chun'){
   			winnings = winnings +2;
   		}
   	} else if (position === 'up'){
-  		pot = jpot.slice('-')[1];
+  		pot = jpot.split('-')[1];
   		if(pot === '3' || pot === '7' || pot === 'south' || pot === 'green'){
   			winnings = winnings +2;
   		}
   	} else if (position === 'left'){
-  		pot = jpot.slice('-')[1];
+  		pot = jpot.split('-')[1];
   		if(pot === '4' || pot === '8' || pot === 'west' || pot === 'haku'){
   			winnings = winnings +2;
   		}
