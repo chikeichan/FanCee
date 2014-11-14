@@ -169,6 +169,8 @@ mj.displayCard = function(set, position,faceUp){
 			$pos.append(mj);
 		}
 	}
+
+
 }
 
 //Display Ponged sets face up for everyone
@@ -212,6 +214,26 @@ mj.refresh = function(position){
 }
 
 
+
+//Development Tools==============================================================
+var Dev = {};
+Dev.me= [];
+Dev.up = [];
+Dev.right = [];
+Dev.left = [];
+var DevStatus = false;
+
+var devMode = function(dev){
+	showOppo = dev;
+	DevStatus = dev;
+	mj.refresh('me')
+	mj.refresh('left')
+	mj.refresh('right')
+	mj.refresh('up');
+}
+
+
+
 //Game Logic ====================================================================
 //Analyzed recently played set to see if a pause is needed.
 mj.ifPause = function(position){
@@ -252,7 +274,6 @@ mj.ifPause = function(position){
 		playerPause = 'me'
 	}
 
-	console.log(pause)
 	return [pause, playerPause];
 }
 
@@ -500,16 +521,16 @@ mj.nextAI = function(position, set){
 				var compare = AISet[j]
 				if(select.cardType === compare.cardType){
 					if(select.cardNum === compare.cardNum){
-						select.cardVal = select.cardVal+3;
+						select.cardVal = select.cardVal+1;
 						times++;
 						if(times === 2){select.cardVal = select.cardVal+2;}
-						if(times === 3){select.cardVal = select.cardVal+4;}
+						if(times === 3){select.cardVal = select.cardVal+3;}
 					};
 					if(select.cardNum - compare.cardNum >= -1 && select.cardNum - compare.cardNum <= 1 ){
 						select.cardVal++;
 					};
 					if(select.cardNum - compare.cardNum >= -2 && select.cardNum - compare.cardNum <= 2 ){
-						select.cardVal++;
+						select.cardVal = select.cardVal+2;
 					}
 				};
 				
@@ -519,7 +540,7 @@ mj.nextAI = function(position, set){
 	var lowest = _.sortBy(AISet, function(x){
 		return x.cardVal;
 	});
-
+	
 	return lowest;
 };
 
@@ -715,11 +736,13 @@ mj.winningHand = function(position,set,reverse){
 		})
 	});
 
-	console.log(position+' ======================================================');
-	console.log('Seq                : '+seq);
-	console.log('Threes             : '+threes);
-	console.log('Pair               : '+pair);
-	console.log('Rest of the card   : '+setArray);
+	if(DevStatus){
+		console.log(position+' ======================================================');
+		console.log('Seq                : '+seq);
+		console.log('Threes             : '+threes);
+		console.log('Pair               : '+pair);
+		console.log('Rest of the card   : '+setArray);
+	}
 	
 	if(setArray.length === 0 && pair.length === 2){
 		return [true,seq,threes,pair,setArray];
@@ -928,6 +951,9 @@ mj.next = function(position, draw){
 				} else if (position === 'left'){
 					mj.currentPos = 'me';
 					mj.mySets.push(mj.gameSets.pop());
+					if(DevStatus){
+						Dev.me = mj.nextAI('me','mySets')
+					}
 					mj.displayGameSets();
 					
 					mj.refresh('me');

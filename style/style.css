@@ -304,3 +304,14 @@ img#gup {
 	margin-left: -34px;
 	float: left;
 }
+
+div#dev {
+	background-color: white;
+	border: 1px solid black;
+	display: block;
+	width: 600px;
+	height: 300px;
+	margin: 53px auto 0px;
+	color: black;
+	text-align: left;
+}
