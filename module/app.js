@@ -783,6 +783,8 @@ mj.win = function(position,sets){
 		}
 	}
 
+	$('.wSet').append('<br/>');
+
 	var pset = this['Pong'+sets];
 	$('.wSet').append('  <p> </p>  ');
 	for(var i=0;i<pset.length;i++){
