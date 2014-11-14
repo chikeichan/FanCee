@@ -42,8 +42,16 @@ div#winning {
 }
 
 #wCard {
-	width: 65px;
+	width: 51px;
 	margin-left: -18px;
+}
+
+img#jackpot {
+	width: 90px;
+	margin: 0 0 0 -13px;
+	position: relative;
+	top: 46px;
+	border-bottom: 4px solid;
 }
 
 p#wMsg {

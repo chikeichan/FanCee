@@ -75,6 +75,10 @@ mj.PongmySets = [];
 mj.PongrSets = [];
 mj.PonguSets = [];
 mj.PonglSets = [];
+mj.mePoints = 0;
+mj.rightPoints = 0;
+mj.upPoints = 0;
+mj.leftPoints = 0;
 
 
 //Starting at player's position, each position takes turn getting a card counter clockwise
@@ -311,6 +315,10 @@ mj.pong = function(position, addOneBack){
 //Execute PKng sequence
 mj.kong = function(position){
 	var set;
+
+	mj[mj.currentPos+'Points'] = mj[mj.currentPos+'Points']-3;
+	mj[position+'Points'] = mj[position+'Points'] + 3;
+
 	if(position === 'right'){
 			set = 'rSets';
 	} else if (position === 'left'){
@@ -723,24 +731,21 @@ mj.winningHand = function(position,set,reverse){
 
 mj.test = ["bamboo-4", "bamboo-4", "bamboo-5", 
 					"bamboo-5","bamboo-6", "bamboo-6", 
-					"man-3","man-3","pin-1", 
-					"pin-1", "pin-2", "pin-2",
+					"man-3","man-3","pin-1",
 					"pin-3","pin-3"];
+mj.Pongtest = ['man-7','man-7','man-7'];
 
 
 //Winning Screen
 mj.win = function(position,sets){
 	this.currentPos = 'win';
-
 	$('#winning').show();
 	$('#wMsg').append(position+' Win!!');
 
 	var result = this.winningHand(position,sets);
-
 	if(!result[0]){
 		result = this.winningHand(position,sets);
 	}
-
 	for(var i=0;i<result[1].length;i++){
 		var mj = '<img id="wCard" src="../graphics/'+result[1][i]+'.png"></img>';
 		$('.wSet').append(mj);
@@ -748,7 +753,6 @@ mj.win = function(position,sets){
 			$('.wSet').append('  <p> </p>  ');
 		}
 	}
-
 	for(var i=0;i<result[2].length;i++){
 		var mj = '<img id="wCard" src="../graphics/'+result[2][i]+'.png"></img>';
 		$('.wSet').append(mj);
@@ -756,7 +760,6 @@ mj.win = function(position,sets){
 			$('.wSet').append('  <p> </p>  ');
 		}
 	}
-
 	for(var i=0;i<result[3].length;i++){
 		var mj = '<img id="wCard" src="../graphics/'+result[3][i]+'.png"></img>';
 		$('.wSet').append(mj);
@@ -764,7 +767,6 @@ mj.win = function(position,sets){
 			$('.wSet').append('  <p> </p>  ');
 		}
 	}
-
 	for(var i=0;i<result[4].length;i++){
 		var mj = '<img id="wCard" src="../graphics/'+result[4][i]+'.png"></img>';
 		$('.wSet').append(mj);
@@ -774,16 +776,83 @@ mj.win = function(position,sets){
 	}
 
 	var pset = this['Pong'+sets];
-
-	$('.wSet').append('<br/>');
-
+	$('.wSet').append('  <p> </p>  ');
 	for(var i=0;i<pset.length;i++){
 		var mj = '<img id="wCard" src="../graphics/'+pset[i]+'.png"></img>';
 		$('.wSet').append(mj);
 	}
 
-}
+	var jackpot = this.gameSets.splice(0,4);
+	this.displayGameSets();
 
+
+	$('.wSet').append('<br/>');
+  var jp0 = '<img id="jackpot" src="../graphics/'+jackpot[0]+'.png"></img>';
+  var jp1 = '<img id="jackpot" src="../graphics/'+jackpot[1]+'.png"></img>';
+  var jp2 = '<img id="jackpot" src="../graphics/'+jackpot[2]+'.png"></img>';
+  var jp3 = '<img id="jackpot" src="../graphics/'+jackpot[3]+'.png"></img>';
+
+  var winnings = 2;
+
+  _.each(jackpot,function(jpot,i){
+  	if(position === 'me'){
+  		pot = jpot.split('-')[1];
+
+  		if(pot === '1' || pot === '5' || pot === '9' || pot === 'north'){
+  			winnings = winnings +2;
+  		}
+  	} else if (position === 'right'){
+  		pot = pot.slice('-')[1];
+  		if(pot === '2' || pot === '6' || pot === 'east' || pot === 'chun'){
+  			winnings = winnings +2;
+  		}
+  	} else if (position === 'up'){
+  		pot = pot.slice('-')[1];
+  		if(pot === '3' || pot === '7' || pot === 'south' || pot === 'green'){
+  			winnings = winnings +2;
+  		}
+  	} else if (position === 'left'){
+  		pot = pot.slice('-')[1];
+  		if(pot === '4' || pot === '8' || pot === 'west' || pot === 'haku'){
+  			winnings = winnings +2;
+  		}
+  	}
+  })
+
+  var winds = ['me','right','left','up'];
+
+  mj = this;
+
+  _.each(winds,function(pos){
+  	if(pos === position){
+  		mj[pos+'Points'] = mj[pos+'Points'] + winnings+ winnings+ winnings;
+
+  	} else {
+  		mj[pos+'Points'] = mj[pos+'Points'] - winnings;
+  	}
+  	console.log(pos+':'+mj[pos+'Points']);
+  	$('div#'+pos).append('<p id="point">'+mj[pos+'Points']+'</p>');
+  })
+		
+	_.delay(function(){
+		$('.wSet').before(jp0);
+	},500)
+
+	_.delay(function(){
+		$('.wSet').before(jp1);
+	},1000)
+
+	_.delay(function(){
+		$('.wSet').before(jp2);
+	},1500)
+
+	_.delay(function(){
+		$('.wSet').before(jp3);
+	},2000)
+		
+	
+
+}
 
 
 //Main recursive logic to execute next round of playing until there are only 4
