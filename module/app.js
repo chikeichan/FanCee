@@ -89,12 +89,19 @@ mj.readySets = function(sets){
 
 	while(this.gameSets.length > 83){
 		this.mySets.push(this.gameSets.pop());
+		this.mySets.sort();
 		if(this.mySets.length>13) {return};
+
 		this.rSets.push(this.gameSets.pop());
+		this.rSets.sort();
 		if(this.rSets.length>13) {return};
+
 		this.uSets.push(this.gameSets.pop());
+		this.uSets.sort();
 		if(this.uSets.length>13) {return};
+
 		this.lSets.push(this.gameSets.pop());
+		this.lSets.sort();
 		if(this.lSets.length>13) {return};
 	}
 }
@@ -156,7 +163,6 @@ mj.displayGameSets = function(){
 //Display sets face up for one player
 mj.displayCard = function(set, position,faceUp){
 	var $pos = $('div#'+position);
-	set.sort();
 
 	if(faceUp){
 		for (var i=0; i<set.length; i++){
@@ -169,7 +175,7 @@ mj.displayCard = function(set, position,faceUp){
 			$pos.append(mj);
 		}
 	}
-
+	set.sort();
 
 }
 
@@ -223,7 +229,7 @@ Dev.right = [];
 Dev.left = [];
 var DevStatus = false;
 
-var devMode = function(dev){
+Dev.devMode = function(dev){
 	showOppo = dev;
 	DevStatus = dev;
 	mj.refresh('me')
@@ -232,6 +238,21 @@ var devMode = function(dev){
 	mj.refresh('up');
 }
 
+Dev.pointStats = function(position, set){
+	var sets = mj.nextAI(position,set);
+	var points = [];
+	var sets = _.groupBy(sets, function(set){
+		points.push(set.cardVal);
+		return set.cardVal;
+	})
+	console.log(sets);
+
+	var avg = _.reduce(points,function(memo,num){
+		return memo+num;
+	},0)
+
+	console.log(avg/points.length);
+}
 
 
 //Game Logic ====================================================================
@@ -471,6 +492,13 @@ mj.listenKong = function(position){
 	}
 }
 
+mj.listenWin = function(position,set){
+
+}
+
+
+
+
 //Return set string to [set Type, set Number]
 mj.readSet = function(set){
 	set = set.replace('.png','');
@@ -497,13 +525,23 @@ var playWood = function(){
 mj.nextAI = function(position, set){
 	var answer = 'no';
 	var AISet = [];
-	_.each(mj[set], function(x,i){
+	var realSet = [];
+
+	var groupSet = this.winningHand(position,set);
+
+	realSet.push(groupSet[3])
+	realSet.push(groupSet[4]);
+	console.log(realSet);
+	realSet = _.flatten(realSet);
+	console.log(realSet);
+
+
+	_.each(realSet, function(x,i){
 		AISet.push({
 			cardName: x,
 			cardType: x.split('-')[0],
 			cardNum: x.split('-')[1],
-			cardVal: 0,
-			cardIndex: i
+			cardVal: 0
 		})
 	})
 
@@ -523,8 +561,7 @@ mj.nextAI = function(position, set){
 					if(select.cardNum === compare.cardNum){
 						select.cardVal = select.cardVal+1;
 						times++;
-						if(times === 2){select.cardVal = select.cardVal+2;}
-						if(times === 3){select.cardVal = select.cardVal+3;}
+						if(times === 1){select.cardVal = select.cardVal+2;}
 					};
 					if(select.cardNum - compare.cardNum >= -1 && select.cardNum - compare.cardNum <= 1 ){
 						select.cardVal++;
@@ -537,12 +574,38 @@ mj.nextAI = function(position, set){
 			}
 		}
 	}
-	var lowest = _.sortBy(AISet, function(x){
+
+
+
+	var sortedList = _.groupBy(AISet, function(x){
 		return x.cardVal;
 	});
 	
-	return lowest;
+	var keyArray = _.keys(sortedList);
+	var lowestKey = keyArray[0];
+	var lowestArray = sortedList[lowestKey];
+	var lowestArray = _.shuffle(lowestArray);
+	var playThis = lowestArray[0];
+
+	console.log(playThis);
+
+	for (var i=0;i<this[set].length;i++){
+		if(playThis.cardName === this[set][i]){
+			return i;
+		}
+	}
+
+
+
+
+
+
 };
+
+
+
+//
+
 
 mj.winningHand = function(position,set,reverse){
 	var result = false;
@@ -736,13 +799,16 @@ mj.winningHand = function(position,set,reverse){
 		})
 	});
 
+	/*
 	if(DevStatus){
 		console.log(position+' ======================================================');
 		console.log('Seq                : '+seq);
 		console.log('Threes             : '+threes);
 		console.log('Pair               : '+pair);
 		console.log('Rest of the card   : '+setArray);
+		Dev.pointStats(position,set);
 	}
+	*/
 	
 	if(setArray.length === 0 && pair.length === 2){
 		return [true,seq,threes,pair,setArray];
@@ -923,7 +989,7 @@ mj.next = function(position, draw){
 
 	
 
-	var index = mj.nextAI(position, set)[0].cardIndex;
+	var index = mj.nextAI(position, set);
 
 	if(typeof index !== 'number') return;
 
@@ -967,8 +1033,9 @@ mj.next = function(position, draw){
 					mj.next('left');
 				}
 			}
-		},700);
+		},500);
 	}
+
 }
 
 
