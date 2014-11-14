@@ -350,8 +350,8 @@ mj.kong = function(position){
 				mj.displayGameSets();
 				mj.refresh('me');
 				mj.displayPong(mj['PongmySets'],'me');
-				if(mj.winningHand('me','mySets')|| mj.winningHand('me','mySets',true)){
-					alert('You win!');
+				if(mj.winningHand('me','mySets')[0]|| mj.winningHand('me','mySets',true)[0]){
+					mj.win('me','mySets');
 					return;
 				}
 			}
@@ -378,8 +378,8 @@ mj.listenPong = function(position){
 					mj.mySets.push(mj.gameSets.pop());
 					mj.refresh('me');
 					mj.displayPong(mj['PongmySets'],'me');
-					if(mj.winningHand('me','mySets')|| mj.winningHand('me','mySets',true)){
-						alert('You win!');
+					if(mj.winningHand('me','mySets')[0]|| mj.winningHand('me','mySets',true)[0]){
+						mj.win('me','mySets');
 						return;
 					}
 				} else if (mj.currentPos === 'up') {
@@ -398,7 +398,7 @@ mj.listenPong = function(position){
 	}
 }
 
-//When a pause is caused by Pong scenario, listen for Kong executive command.
+//When a pause is caused by Kong scenario, listen for Kong executive command.
 mj.listenKong = function(position){
 	var lastSet = mj.playedSets[mj.playedSets.length-1];
 
@@ -422,8 +422,8 @@ mj.listenKong = function(position){
 					mj.mySets.push(mj.gameSets.pop());
 					mj.refresh('me');
 					mj.displayPong(mj['PongmySets'],'me');
-					if(mj.winningHand('me','mySets')|| mj.winningHand('me','mySets',true)){
-						alert('You win!');
+					if(mj.winningHand('me','mySets')[0]|| mj.winningHand('me','mySets',true)[0]){
+						mj.win('me','mySets');
 						return;
 					}
 				} else if (mj.currentPos === 'up') {
@@ -714,9 +714,9 @@ mj.winningHand = function(position,set,reverse){
 	console.log('Rest of the card   : '+setArray);
 	
 	if(setArray.length === 0 && pair.length === 2){
-		return true;
+		return [true,seq,threes,pair,setArray];
 	} else {
-		return false;
+		return [false,seq,threes,pair,setArray];
 	}
 
 };
@@ -725,7 +725,66 @@ mj.test = ["bamboo-4", "bamboo-4", "bamboo-5",
 					"bamboo-5","bamboo-6", "bamboo-6", 
 					"man-3","man-3","pin-1", 
 					"pin-1", "pin-2", "pin-2",
-					"pin-3","pin-3"]
+					"pin-3","pin-3"];
+
+
+//Winning Screen
+mj.win = function(position,sets){
+	this.currentPos = 'win';
+
+	$('#winning').show();
+	$('#wMsg').append(position+' Win!!');
+
+	var result = this.winningHand(position,sets);
+
+	if(!result[0]){
+		result = this.winningHand(position,sets);
+	}
+
+	for(var i=0;i<result[1].length;i++){
+		var mj = '<img id="wCard" src="../graphics/'+result[1][i]+'.png"></img>';
+		$('.wSet').append(mj);
+		if(i===2||i===5||i===8||i===11){
+			$('.wSet').append('  <p> </p>  ');
+		}
+	}
+
+	for(var i=0;i<result[2].length;i++){
+		var mj = '<img id="wCard" src="../graphics/'+result[2][i]+'.png"></img>';
+		$('.wSet').append(mj);
+		if(i===2||i===5||i===8||i===11){
+			$('.wSet').append('  <p> </p>  ');
+		}
+	}
+
+	for(var i=0;i<result[3].length;i++){
+		var mj = '<img id="wCard" src="../graphics/'+result[3][i]+'.png"></img>';
+		$('.wSet').append(mj);
+		if(i===2||i===5||i===8||i===11){
+			$('.wSet').append('  <p> </p>  ');
+		}
+	}
+
+	for(var i=0;i<result[4].length;i++){
+		var mj = '<img id="wCard" src="../graphics/'+result[4][i]+'.png"></img>';
+		$('.wSet').append(mj);
+		if(i===2||i===5||i===8||i===11){
+			$('.wSet').append('  <p> </p>  ');
+		}
+	}
+
+	var pset = this['Pong'+sets];
+
+	$('.wSet').append('<br/>');
+
+	for(var i=0;i<pset.length;i++){
+		var mj = '<img id="wCard" src="../graphics/'+pset[i]+'.png"></img>';
+		$('.wSet').append(mj);
+	}
+
+}
+
+
 
 //Main recursive logic to execute next round of playing until there are only 4
 //cards left in the gamesets
@@ -749,8 +808,8 @@ mj.next = function(position, draw){
 			mj.displayGameSets();
 			mj.refresh(position);
 			mj.displayPong(mj['Pong'+set],position);
-			if(mj.winningHand(position,set) || mj.winningHand(position,set,true)){
-			alert(position+' win!');
+			if(mj.winningHand(position,set)[0] || mj.winningHand(position,set,true)[0]){
+				mj.win(position,set);
 			return;
 		}
 	}
@@ -789,8 +848,8 @@ mj.next = function(position, draw){
 					
 					mj.refresh('me');
 					mj.displayPong(mj['PongmySets'],'me');
-					if(mj.winningHand('me','mySets')|| mj.winningHand('me','mySets',true)){
-						alert('You win!');
+					if(mj.winningHand('me','mySets')[0]|| mj.winningHand('me','mySets',true)[0]){
+						mj.win('me','mySets');
 						return;
 					}
 				} else if (position === 'up') {
@@ -858,8 +917,8 @@ $(document).ready(function(){
 					mj.mySets.push(mj.gameSets.pop());
 					mj.refresh('me');
 					mj.displayPong(mj['PongmySets'],'me');
-					if(mj.winningHand('me','mySets')|| mj.winningHand('me','mySets',true)){
-						alert('you win!');
+					if(mj.winningHand('me','mySets')[0]|| mj.winningHand('me','mySets',true)[0]){
+						mj.win('me','mySets');
 						return;
 					}
 				} else if (mj.currentPos === 'up') {
