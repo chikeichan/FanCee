@@ -78,6 +78,16 @@ p#wMsg {
 	top: 15px;
 }
 
+div#replay {
+	font-size: 30px;
+	font-family: Fontdiner Swanky;
+	position: relative;
+	top: 25px;
+	z-index: 10;
+	display: none;
+}
+
+
 div#me {
 	width: 550px;
 	height: 50px;
@@ -223,6 +233,7 @@ div#panel div p {
 
 a {
 	color: rgb(215, 199, 121);
+	text-decoration: none;
 }
 
 a:active {

@@ -50,6 +50,89 @@ mj.fullSets = {
 	}
 }
 
+mj.initialize = function(){
+	mj.fullSets = {
+		bamboo : {
+			'1': 4,
+			'2': 4,
+			'3': 4,
+			'4': 4,
+			'5': 4,
+			'6': 4,
+			'7': 4,
+			'8': 4,
+			'9': 4
+		},
+		man : {
+			'1': 4,
+			'2': 4,
+			'3': 4,
+			'4': 4,
+			'5': 4,
+			'6': 4,
+			'7': 4,
+			'8': 4,
+			'9': 4
+		},
+		pin : {
+			'1': 4,
+			'2': 4,
+			'3': 4,
+			'4': 4,
+			'5': 4,
+			'6': 4,
+			'7': 4,
+			'8': 4,
+			'9': 4
+		},
+		zdragon : {
+			'chun': 4,
+			'green': 4,
+			'haku' : 4
+		},
+		wind : {
+			'east' : 4,
+			'north' : 4,
+			'south' : 4,
+			'west' : 4
+		}
+	}
+
+	$('#wMsg').html('');
+	$('.wSet').html('');
+	$('table#winning').html('');
+	$('div#winning').hide();
+	$('img').remove();
+	$('div#replay').hide();
+
+
+	mj.mySets = [];
+	mj.rSets = [];
+	mj.uSets = [];
+	mj.lSets = [];
+	mj.meLast = '';
+	mj.rightLast = '';
+	mj.upLast = '';
+	mj.leftLast = '';
+	mj.playedSets = [];
+	mj.currentPos = 'me';
+	mj.PongmySets = [];
+	mj.PongrSets = [];
+	mj.PonguSets = [];
+	mj.PonglSets = [];
+	showOppo = false;
+
+
+	mj.gameSets = mj.shuffleSets();
+	mj.readySets();
+	mj.refresh('me');
+	mj.refresh('left');
+	mj.refresh('right');
+	mj.refresh('up');
+	mj.refresh('field');
+	mj.displayGameSets();
+}
+
 //Function to return a shuffled array of MahJong sets
 mj.shuffleSets = function(){
 	var sets = [];
@@ -79,10 +162,10 @@ mj.PongmySets = [];
 mj.PongrSets = [];
 mj.PonguSets = [];
 mj.PonglSets = [];
-mj.mePoints = 0;
-mj.rightPoints = 0;
-mj.upPoints = 0;
-mj.leftPoints = 0;
+mj.mePoints = 100;
+mj.rightPoints = 100;
+mj.upPoints = 100;
+mj.leftPoints = 100;
 
 
 //Starting at player's position, each position takes turn getting a card counter clockwise
@@ -1165,6 +1248,7 @@ mj.win = function(position,sets){
   var jp1 = '<img id="jackpot" src="../graphics/'+jackpot[1]+'.png"></img>';
   var jp2 = '<img id="jackpot" src="../graphics/'+jackpot[2]+'.png"></img>';
   var jp3 = '<img id="jackpot" src="../graphics/'+jackpot[3]+'.png"></img>';
+  var jp = '<img id="jackpot" src="../graphics/facedown.png"></img>'
 
   var winnings = 2;
 
@@ -1197,22 +1281,42 @@ mj.win = function(position,sets){
 
   mj = this;
 
-  
+  $('.wSet').before(jp);
+  $('.wSet').before(jp);
+  $('.wSet').before(jp);
+  $('.wSet').before(jp);
+
 		
 	_.delay(function(){
+		$('img#jackpot').remove();
 		$('.wSet').before(jp0);
+		$('.wSet').before(jp);
+	  $('.wSet').before(jp);
+	  $('.wSet').before(jp);
 	},500)
 
 	_.delay(function(){
+		$('img#jackpot').remove();
+		$('.wSet').before(jp0);
 		$('.wSet').before(jp1);
+	  $('.wSet').before(jp);
+	  $('.wSet').before(jp);
 	},1000)
 
 	_.delay(function(){
-		$('.wSet').before(jp2);
+		$('img#jackpot').remove();
+		$('.wSet').before(jp0);
+		$('.wSet').before(jp1);
+	  $('.wSet').before(jp2);
+	  $('.wSet').before(jp);
 	},1500)
 
 	_.delay(function(){
-		$('.wSet').before(jp3);
+		$('img#jackpot').remove();
+		$('.wSet').before(jp0);
+		$('.wSet').before(jp1);
+	  $('.wSet').before(jp2);
+	  $('.wSet').before(jp3);
 	},2000)
 		
 	_.delay(function(){	
@@ -1230,6 +1334,10 @@ mj.win = function(position,sets){
 	  													'</td>');
 	  })
   },2500)
+
+  _.delay(function(){
+  	$('div#replay').show();
+  },2550);
 
 }
 
@@ -1358,6 +1466,10 @@ $(document).ready(function(){
 			mj.kong('me');
 			$('div#panel').fadeOut(200);
 		}
+	})
+
+	$(document).on('click', 'div#replay', function(){
+		mj.initialize();
 	})
 
 	$(document).on('click', 'div#Null', function(){
