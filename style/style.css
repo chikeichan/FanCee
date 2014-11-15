@@ -81,10 +81,11 @@ p#wMsg {
 div#replay {
 	font-size: 30px;
 	font-family: Fontdiner Swanky;
-	position: relative;
-	top: 25px;
+	position: absolute;
+	right: 0;
+	left: 0;
+	bottom: 10px;
 	z-index: 10;
-	display: none;
 }
 
 

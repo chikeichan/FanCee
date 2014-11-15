@@ -103,7 +103,6 @@ mj.initialize = function(){
 	$('table#winning').html('');
 	$('div#winning').hide();
 	$('img').remove();
-	$('div#replay').hide();
 
 
 	mj.mySets = [];
@@ -162,6 +161,7 @@ mj.PongmySets = [];
 mj.PongrSets = [];
 mj.PonguSets = [];
 mj.PonglSets = [];
+mj.house = '';
 mj.mePoints = 100;
 mj.rightPoints = 100;
 mj.upPoints = 100;
@@ -191,6 +191,14 @@ mj.readySets = function(sets){
 		this.lSets.sort();
 		if(this.lSets.length>13) {return};
 	}
+}
+
+//Roll Dice
+mj.rollDice = function(){
+	var dice1 = _.shuffle([1,2,3,4,5,6])[0];
+	var dice2 = _.shuffle([1,2,3,4,5,6])[0];
+	console.log(dice1+','+dice2);
+	
 }
 
 //Rendering =======================================================================
@@ -1194,150 +1202,166 @@ mj.win = function(position,sets){
 	this.displayPong(this['PongrSets'],'right');
 	this.displayPong(this['PonguSets'],'up');
 
+	var winds = ['me','right','up','left'];
+	var mj = this;
+
 	$('#winning').show();
 	$('#wMsg').append(position+' Win!!');
 
-	var result = this.winningHand(position,sets);
-	if(!result[0]){
-		result = this.winningHand(position,sets,true);
-	}
-	for(var i=0;i<result[1].length;i++){
-		var mj = '<img id="wCard" src="../graphics/'+result[1][i]+'.png"></img>';
-		$('.wSet').append(mj);
-		if(i===2||i===5||i===8||i===11){
-			$('.wSet').append('  <p> </p>  ');
+
+	if(position !== "No Body") {
+
+		var result = this.winningHand(position,sets);
+		if(!result[0]){
+			result = this.winningHand(position,sets,true);
 		}
-	}
-	for(var i=0;i<result[2].length;i++){
-		var mj = '<img id="wCard" src="../graphics/'+result[2][i]+'.png"></img>';
-		$('.wSet').append(mj);
-		if(i===2||i===5||i===8||i===11){
-			$('.wSet').append('  <p> </p>  ');
+		for(var i=0;i<result[1].length;i++){
+			var mj = '<img id="wCard" src="../graphics/'+result[1][i]+'.png"></img>';
+			$('.wSet').append(mj);
+			if(i===2||i===5||i===8||i===11){
+				$('.wSet').append('  <p> </p>  ');
+			}
 		}
-	}
-	for(var i=0;i<result[3].length;i++){
-		var mj = '<img id="wCard" src="../graphics/'+result[3][i]+'.png"></img>';
-		$('.wSet').append(mj);
-		if(i===2||i===5||i===8||i===11){
-			$('.wSet').append('  <p> </p>  ');
+		for(var i=0;i<result[2].length;i++){
+			var mj = '<img id="wCard" src="../graphics/'+result[2][i]+'.png"></img>';
+			$('.wSet').append(mj);
+			if(i===2||i===5||i===8||i===11){
+				$('.wSet').append('  <p> </p>  ');
+			}
 		}
-	}
-	for(var i=0;i<result[4].length;i++){
-		var mj = '<img id="wCard" src="../graphics/'+result[4][i]+'.png"></img>';
-		$('.wSet').append(mj);
-		if(i===2||i===5||i===8||i===11){
-			$('.wSet').append('  <p> </p>  ');
+		for(var i=0;i<result[3].length;i++){
+			var mj = '<img id="wCard" src="../graphics/'+result[3][i]+'.png"></img>';
+			$('.wSet').append(mj);
+			if(i===2||i===5||i===8||i===11){
+				$('.wSet').append('  <p> </p>  ');
+			}
 		}
-	}
+		for(var i=0;i<result[4].length;i++){
+			var mj = '<img id="wCard" src="../graphics/'+result[4][i]+'.png"></img>';
+			$('.wSet').append(mj);
+			if(i===2||i===5||i===8||i===11){
+				$('.wSet').append('  <p> </p>  ');
+			}
+		}
 
-	$('.wSet').append('<br/>');
+		$('.wSet').append('<br/>');
 
-	var pset = this['Pong'+sets];
-	$('.wSet').append('  <p> </p>  ');
-	for(var i=0;i<pset.length;i++){
-		var mj = '<img id="wCard" src="../graphics/'+pset[i]+'.png"></img>';
-		$('.wSet').append(mj);
-	}
+		var pset = this['Pong'+sets];
+		$('.wSet').append('  <p> </p>  ');
+		for(var i=0;i<pset.length;i++){
+			var mj = '<img id="wCard" src="../graphics/'+pset[i]+'.png"></img>';
+			$('.wSet').append(mj);
+		}
 
-	var jackpot = this.gameSets.splice(0,4);
-	this.displayGameSets();
+		var jackpot = this.gameSets.splice(0,4);
+		this.displayGameSets();
 
 
-	$('.wSet').append('<br/>');
-  var jp0 = '<img id="jackpot" src="../graphics/'+jackpot[0]+'.png"></img>';
-  var jp1 = '<img id="jackpot" src="../graphics/'+jackpot[1]+'.png"></img>';
-  var jp2 = '<img id="jackpot" src="../graphics/'+jackpot[2]+'.png"></img>';
-  var jp3 = '<img id="jackpot" src="../graphics/'+jackpot[3]+'.png"></img>';
-  var jp = '<img id="jackpot" src="../graphics/facedown.png"></img>'
+		$('.wSet').append('<br/>');
+	  var jp0 = '<img id="jackpot" src="../graphics/'+jackpot[0]+'.png"></img>';
+	  var jp1 = '<img id="jackpot" src="../graphics/'+jackpot[1]+'.png"></img>';
+	  var jp2 = '<img id="jackpot" src="../graphics/'+jackpot[2]+'.png"></img>';
+	  var jp3 = '<img id="jackpot" src="../graphics/'+jackpot[3]+'.png"></img>';
+	  var jp = '<img id="jackpot" src="../graphics/facedown.png"></img>'
 
-  var winnings = 2;
+	  var winnings = 2;
 
-  _.each(jackpot,function(jpot,i){
-  	if(position === 'me'){
-  		pot = jpot.split('-')[1];
+	  _.each(jackpot,function(jpot,i){
+	  	if(position === 'me'){
+	  		pot = jpot.split('-')[1];
 
-  		if(pot === '1' || pot === '5' || pot === '9' || pot === 'north'){
-  			winnings = winnings +2;
-  		}
-  	} else if (position === 'right'){
-  		pot = jpot.split('-')[1];
-  		if(pot === '2' || pot === '6' || pot === 'east' || pot === 'chun'){
-  			winnings = winnings +2;
-  		}
-  	} else if (position === 'up'){
-  		pot = jpot.split('-')[1];
-  		if(pot === '3' || pot === '7' || pot === 'south' || pot === 'green'){
-  			winnings = winnings +2;
-  		}
-  	} else if (position === 'left'){
-  		pot = jpot.split('-')[1];
-  		if(pot === '4' || pot === '8' || pot === 'west' || pot === 'haku'){
-  			winnings = winnings +2;
-  		}
-  	}
-  })
-
-  var winds = ['me','right','up','left'];
-
-  mj = this;
-
-  $('.wSet').before(jp);
-  $('.wSet').before(jp);
-  $('.wSet').before(jp);
-  $('.wSet').before(jp);
-
-		
-	_.delay(function(){
-		$('img#jackpot').remove();
-		$('.wSet').before(jp0);
-		$('.wSet').before(jp);
-	  $('.wSet').before(jp);
-	  $('.wSet').before(jp);
-	},500)
-
-	_.delay(function(){
-		$('img#jackpot').remove();
-		$('.wSet').before(jp0);
-		$('.wSet').before(jp1);
-	  $('.wSet').before(jp);
-	  $('.wSet').before(jp);
-	},1000)
-
-	_.delay(function(){
-		$('img#jackpot').remove();
-		$('.wSet').before(jp0);
-		$('.wSet').before(jp1);
-	  $('.wSet').before(jp2);
-	  $('.wSet').before(jp);
-	},1500)
-
-	_.delay(function(){
-		$('img#jackpot').remove();
-		$('.wSet').before(jp0);
-		$('.wSet').before(jp1);
-	  $('.wSet').before(jp2);
-	  $('.wSet').before(jp3);
-	},2000)
-		
-	_.delay(function(){	
-		_.each(winds,function(pos){
-	  	if(pos === position){
-	  		mj[pos+'Points'] = mj[pos+'Points'] + winnings+ winnings+ winnings;
-
-	  	} else {
-	  		mj[pos+'Points'] = mj[pos+'Points'] - winnings;
+	  		if(pot === '1' || pot === '5' || pot === '9' || pot === 'north'){
+	  			winnings = winnings +2;
+	  		}
+	  	} else if (position === 'right'){
+	  		pot = jpot.split('-')[1];
+	  		if(pot === '2' || pot === '6' || pot === 'east' || pot === 'chun'){
+	  			winnings = winnings +2;
+	  		}
+	  	} else if (position === 'up'){
+	  		pot = jpot.split('-')[1];
+	  		if(pot === '3' || pot === '7' || pot === 'south' || pot === 'green'){
+	  			winnings = winnings +2;
+	  		}
+	  	} else if (position === 'left'){
+	  		pot = jpot.split('-')[1];
+	  		if(pot === '4' || pot === '8' || pot === 'west' || pot === 'haku'){
+	  			winnings = winnings +2;
+	  		}
 	  	}
-	  	console.log(pos+':'+mj[pos+'Points']);
+	  })
+
+	  
+
+	  mj = this;
+
+	  $('.wSet').before(jp);
+	  $('.wSet').before(jp);
+	  $('.wSet').before(jp);
+	  $('.wSet').before(jp);
+
+			
+		_.delay(function(){
+			$('img#jackpot').remove();
+			$('.wSet').before(jp0);
+			$('.wSet').before(jp);
+		  $('.wSet').before(jp);
+		  $('.wSet').before(jp);
+		},500)
+
+		_.delay(function(){
+			$('img#jackpot').remove();
+			$('.wSet').before(jp0);
+			$('.wSet').before(jp1);
+		  $('.wSet').before(jp);
+		  $('.wSet').before(jp);
+		},1000)
+
+		_.delay(function(){
+			$('img#jackpot').remove();
+			$('.wSet').before(jp0);
+			$('.wSet').before(jp1);
+		  $('.wSet').before(jp2);
+		  $('.wSet').before(jp);
+		},1500)
+
+		_.delay(function(){
+			$('img#jackpot').remove();
+			$('.wSet').before(jp0);
+			$('.wSet').before(jp1);
+		  $('.wSet').before(jp2);
+		  $('.wSet').before(jp3);
+		},2000)
+
+			
+		_.delay(function(){	
+			_.each(winds,function(pos){
+		  	if(pos === position){
+		  		mj[pos+'Points'] = mj[pos+'Points'] + winnings+ winnings+ winnings;
+
+		  	} else {
+		  		mj[pos+'Points'] = mj[pos+'Points'] - winnings;
+		  	}
+		  	//console.log(pos+':'+mj[pos+'Points']);
+		  	$('table#winning').append('<tr>'+
+		  													'<td>'+pos+'</td>'+
+		  													'<td id="number">'+mj[pos+"Points"]+'</td>'+
+		  													'</td>');
+		  })
+	  },2500)
+	} else {
+		
+		_.each(winds,function(pos){
+			//console.log(mj[pos+"Points"])
 	  	$('table#winning').append('<tr>'+
 	  													'<td>'+pos+'</td>'+
 	  													'<td id="number">'+mj[pos+"Points"]+'</td>'+
 	  													'</td>');
 	  })
-  },2500)
+	  
 
-  _.delay(function(){
-  	$('div#replay').show();
-  },2550);
+	}
+
 
 }
 
@@ -1357,11 +1381,10 @@ mj.next = function(position, draw){
 		mj.currentPos = 'me';
 	}
 
+
+
 	if(draw === false) {
 
-	} else if (mj.gameSets.length < 5){
-		mj.currentPos = 'over';
-		mj.win('No Body');
 	} else {
 			mj[set].push(mj.gameSets.pop());
 			mj.displayGameSets();
@@ -1388,6 +1411,12 @@ mj.next = function(position, draw){
 	mj.refresh('field');
 	mj.refresh(position);
 	mj.displayPong(mj['Pong'+set],position);
+
+	if (mj.gameSets.length < 5) {
+		mj.currentPos = 'over';
+		mj.win('No Body');
+		return;
+	}
 
 
 	if(mj.ifPause(position)[0]==='pong'){
@@ -1429,6 +1458,7 @@ mj.next = function(position, draw){
 
 //DOM Manipulation and Interactions
 $(document).ready(function(){
+	/*
 	mj.gameSets = mj.shuffleSets();
 	mj.readySets();
 	mj.displayGameSets();
@@ -1436,6 +1466,9 @@ $(document).ready(function(){
 	mj.refresh('left');
 	mj.refresh('right');
 	mj.refresh('up');
+	*/
+
+	mj.initialize();
 
 	$(document).on('mouseenter','img#me',function(){
 		$(this).stop().animate({
