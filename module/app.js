@@ -319,49 +319,45 @@ mj.pongAI = function(position){
 		set = 'test';
 	}
 
-	var test = mj[set].slice();
-	test = _.without(test,mj.playedSets[mj.playedSets.length - 1]);
+	var currentProb = mj.winProb(position,set,false);
+	console.log(mj[set]);
+	console.log('current Prob ===============')
+	console.log(currentProb);
 
-	var currentProb = mj.winProb(position,set,false).total;
 	var nextProb = -1;
 
-	_.each(test,function(x,i){
-		if(mj.winProb(position,set,x).total > nextProb){
+	var target = mj.playedSets[mj.playedSets.length-1]
+	if(set === 'test') target = 'bamboo-4'
+
+	console.log('Should we pong '+target+'?');
+
+	mj[set] = _.without(mj[set], target);
+	console.log('If we do, we will have...');
+	console.log(mj[set]);
+
+	_.each(mj[set],function(x,i){
+		var temp = mj.winProb(position,set,x);
+		console.log(temp);
+		if(temp.total > nextProb){
 			nextProb = mj.winProb(position,set,x).total;
 		}
 	});
 
-	if(nextProb!== 0 || currentProb !==0){
-		return nextProb >= currentProb;
+	mj[set].push(target);
+	mj[set].push(target);
+	console.log(currentProb.total)
+	console.log(nextProb);
+
+	if(currentProb.total!== 0 && nextProb !== 0){
+		return nextProb >= currentProb.total;
 	}
 
-	var test = mj.returnScore(test);
-	var sortedList = _.groupBy(test, function(x){
-		return x.cardVal;
-	});
-	var keyArray = _.keys(sortedList);
-	var lowestKey = keyArray[0];
-	var lowestArray = sortedList[lowestKey];
-	var omitThis = lowestArray[0];
-	var omitIndex = 0;
-
-	_.each(test,function(x,i){
-		if(x.cardName === omitThis.cardName){
-			omitIndex = i;
-			console.log(x);
-		}
-	})
-
-
-	var ifPongAvg = mj.getAvg(test,omitIndex);
-	var ifNotPongAvg = mj.getAvg(mj.returnScore(mj[set]));
 
 
 
-	console.log(ifPongAvg);
-	console.log(ifNotPongAvg);
+	return true;
 
-	return ifPongAvg >= ifNotPongAvg;
+
 }
 
 mj.returnScore = function(set){
@@ -390,15 +386,17 @@ mj.returnScore = function(set){
 				var compare = AISet[j]
 				if(select.cardType === compare.cardType){
 					if(select.cardNum === compare.cardNum){
-						select.cardVal = select.cardVal+1;
+						select.cardVal = select.cardVal+2;
 						times++;
-						if(times === 1){select.cardVal = select.cardVal+2;}
+						if(times === 1){select.cardVal = select.cardVal+1;}
+						if(times === 2){select.cardVal = select.cardVal+1;}
+						if(times === 3){select.cardVal = select.cardVal+1;}
 					};
 					if(select.cardNum - compare.cardNum >= -1 && select.cardNum - compare.cardNum <= 1 ){
 						select.cardVal++;
 					};
 					if(select.cardNum - compare.cardNum >= -2 && select.cardNum - compare.cardNum <= 2 ){
-						select.cardVal = select.cardVal+2;
+						select.cardVal = select.cardVal+1;
 					}
 				};
 				
@@ -675,15 +673,17 @@ mj.nextAI = function(position, set){
 				var compare = AISet[j]
 				if(select.cardType === compare.cardType){
 					if(select.cardNum === compare.cardNum){
-						select.cardVal = select.cardVal+1;
+						select.cardVal = select.cardVal+2;
 						times++;
-						if(times === 1){select.cardVal = select.cardVal+2;}
+						if(times === 1){select.cardVal = select.cardVal+1;}
+						if(times === 2){select.cardVal = select.cardVal+1;}
+						if(times === 3){select.cardVal = select.cardVal+1;}
 					};
 					if(select.cardNum - compare.cardNum >= -1 && select.cardNum - compare.cardNum <= 1 ){
 						select.cardVal++;
 					};
 					if(select.cardNum - compare.cardNum >= -2 && select.cardNum - compare.cardNum <= 2 ){
-						select.cardVal = select.cardVal+2;
+						select.cardVal = select.cardVal+1;
 					}
 				};
 				
@@ -765,6 +765,8 @@ mj.winProb = function(position,set,piece){
 				}
 			}
 
+		} else if(pairs.length === 0 && singles.length === 1){
+			need.push(singles);
 		}
 	}
 
@@ -798,6 +800,7 @@ mj.winProb = function(position,set,piece){
 		})
 	})
 
+	//console.log(answer);
 	return answer;
 
 }
@@ -1030,8 +1033,8 @@ mj.winningHand = function(position,set,reverse,pop,piece){
 
 mj.test = ["bamboo-4", "bamboo-4", "bamboo-5", 
 					"bamboo-5","bamboo-6", "bamboo-6", 
-					"man-8","man-9",
-					"pin-3","pin-3","man-3"];
+					"bamboo-7","bamboo-7",
+					"pin-9","pin-3"];
 mj.Pongtest = ['man-7','man-7','man-7'];
 
 mj.testLast = 'man-3'
