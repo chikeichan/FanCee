@@ -69,6 +69,10 @@ mj.mySets = [];
 mj.rSets = [];
 mj.uSets = [];
 mj.lSets = [];
+mj.meLast = '';
+mj.rightLast = '';
+mj.upLast = '';
+mj.leftLast = '';
 mj.playedSets = [];
 mj.currentPos = 'me';
 mj.PongmySets = [];
@@ -163,6 +167,7 @@ mj.displayGameSets = function(){
 //Display sets face up for one player
 mj.displayCard = function(set, position,faceUp){
 	var $pos = $('div#'+position);
+	this[position+'Last'] = set[set.length-1];
 
 	if(faceUp){
 		for (var i=0; i<set.length; i++){
@@ -492,10 +497,6 @@ mj.listenKong = function(position){
 	}
 }
 
-mj.listenWin = function(position,set){
-
-}
-
 
 
 
@@ -529,11 +530,11 @@ mj.nextAI = function(position, set){
 
 	var groupSet = this.winningHand(position,set);
 
+	var probSet = this.winProb(position,set,groupSet);
+
 	realSet.push(groupSet[3])
 	realSet.push(groupSet[4]);
-	console.log(realSet);
 	realSet = _.flatten(realSet);
-	console.log(realSet);
 
 
 	_.each(realSet, function(x,i){
@@ -594,20 +595,75 @@ mj.nextAI = function(position, set){
 			return i;
 		}
 	}
-
-
-
-
-
-
 };
 
+mj.winProb = function(position,set){
+	var mj = this;
+	var winSet = mj.winningHand(position,set,false,true,mj[position+'Last']);
+	var revWinSet = mj.winningHand(position,set,true,true,mj[position+'Last']);
+	var need = [];
+
+	var getNeed = function(nestedSet){
+		var pairs = nestedSet[3];
+		var singles = nestedSet[4];
+		if(pairs.length === 4 && singles.length === 0){
+			need.push(_.unique(pairs));
+		} else if (pairs.length === 2 && singles.length === 2){
+			var xkey = singles[0].split('-')[0];
+			var xvalue = singles[0].split('-')[1];
+			var ykey = singles[1].split('-')[0];
+			var yvalue = singles[1].split('-')[1];
+
+			if(xkey === ykey){
+				if(xvalue - yvalue === 1 ){
+					need.push(ykey+'-'+(yvalue-1));
+					need.push(xkey+'-'+(-xvalue+1));
+				} else if(xvalue - yvalue === -1 ){
+					need.push(ykey+'-'+(xvalue-1));
+					need.push(xkey+'-'+(-yvalue+1));
+				}
+			}
+
+		}
+	}
+
+	getNeed(winSet);
+	getNeed(revWinSet);
+	need = _.flatten(need);
+	need = _.uniq(need);
+	console.log(need);
+
+	var answer = {total: 0};
+
+	_.each(need,function(x,i){
+		answer[x] = 4;
+		answer.total = answer.total + 4;
+	})
+
+	var knowSet = mj[set].slice();
+	knowSet.push(mj.PongmySets);
+	knowSet.push(mj.PonglSets);
+	knowSet.push(mj.PongrSets);
+	knowSet.push(mj.PonguSets);
+	knowSet.push(mj.playedSets);
+	knowSet = _.flatten(knowSet);
 
 
-//
+	_.each(need,function(set,index){
+		_.each(knowSet,function(exist,i){
+			if(set === exist){
+				answer[set]--;
+				answer.total --;
+			}
+		})
+	})
+
+	return answer;
+
+}
 
 
-mj.winningHand = function(position,set,reverse){
+mj.winningHand = function(position,set,reverse,pop,piece){
 	var result = false;
 	var theSet = {};
 	var pair= [];
@@ -618,6 +674,20 @@ mj.winningHand = function(position,set,reverse){
 
 	//Get Seq first
 	var setArray = mj[set].slice();
+	
+	if(pop){
+		var done = false;
+		_.each(setArray,function(x,i){
+			if(x === piece && !done){
+				setArray.splice(i,1)
+				done = true;
+				return;
+			}
+		})
+	}
+	
+	setArray.sort();
+	
 
 	var sequenize = function(){
 	
@@ -820,9 +890,11 @@ mj.winningHand = function(position,set,reverse){
 
 mj.test = ["bamboo-4", "bamboo-4", "bamboo-5", 
 					"bamboo-5","bamboo-6", "bamboo-6", 
-					"man-3","man-3","man-3",
-					"pin-3","pin-3"];
+					"man-3","man-3",
+					"pin-3","pin-3","man-3"];
 mj.Pongtest = ['man-7','man-7','man-7'];
+
+mj.testLast = 'man-3'
 
 
 //Winning Screen
