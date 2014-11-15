@@ -306,8 +306,110 @@ mj.ifPause = function(position){
 
 //AI to return boolean whether or not to pong.
 mj.pongAI = function(position){
-	return true;
+	var set;
+	if(position === 'right'){
+			set = 'rSets';
+	} else if (position === 'left'){
+		set = 'lSets';
+	} else if (position === 'up') {
+		set = 'uSets';
+	} else if (position === 'me') {
+		set = 'mySets';
+	} else if (position === 'test') {
+		set = 'test';
+	}
+
+	var test = mj[set].slice();
+	test = _.without(test,mj.playedSets[mj.playedSets.length - 1]);
+
+	var currentProb = mj.winProb(position,set,false).total;
+	var nextProb = -1;
+
+	_.each(test,function(x,i){
+		if(mj.winProb(position,set,x).total > nextProb){
+			nextProb = mj.winProb(position,set,x).total;
+		}
+	});
+
+	if(nextProb!== 0 || currentProb !==0){
+		return nextProb >= currentProb;
+	}
+
+	var test = mj.returnScore(test);
+	var sortedList = _.groupBy(test, function(x){
+		return x.cardVal;
+	});
+	var keyArray = _.keys(sortedList);
+	var lowestKey = keyArray[0];
+	var lowestArray = sortedList[lowestKey];
+	var omitThis = lowestArray[0];
+	var omitIndex = 0;
+
+	_.each(test,function(x,i){
+		if(x.cardName === omitThis.cardName){
+			omitIndex = i;
+			console.log(x);
+		}
+	})
+
+
+	var ifPongAvg = mj.getAvg(test,omitIndex);
+	var ifNotPongAvg = mj.getAvg(mj.returnScore(mj[set]));
+
+
+
+	console.log(ifPongAvg);
+	console.log(ifNotPongAvg);
+
+	return ifPongAvg >= ifNotPongAvg;
 }
+
+mj.returnScore = function(set){
+	var AISet = [];
+
+	_.each(set, function(x,i){
+		AISet.push({
+			cardName: x,
+			cardType: x.split('-')[0],
+			cardNum: x.split('-')[1],
+			cardVal: 0
+		})
+	})
+
+	for (var i=0; i<AISet.length; i++){
+		var select = AISet[i];
+		var times = 0;
+		if(select.cardType!=='wind'&&select.cardType!=='zdragon'){
+			select.cardVal++;
+			if(select.cardNum >= 3 && select.cardNum <= 7){
+				select.cardVal++;
+			}
+		}
+		for(var j=0; j<AISet.length; j++){
+			if(i!==j){
+				var compare = AISet[j]
+				if(select.cardType === compare.cardType){
+					if(select.cardNum === compare.cardNum){
+						select.cardVal = select.cardVal+1;
+						times++;
+						if(times === 1){select.cardVal = select.cardVal+2;}
+					};
+					if(select.cardNum - compare.cardNum >= -1 && select.cardNum - compare.cardNum <= 1 ){
+						select.cardVal++;
+					};
+					if(select.cardNum - compare.cardNum >= -2 && select.cardNum - compare.cardNum <= 2 ){
+						select.cardVal = select.cardVal+2;
+					}
+				};
+				
+			}
+		}
+	}
+	console.log(AISet);
+	return AISet;
+}
+
+
 
 mj.kongAI = function(position){
 	return 'kong';
@@ -530,7 +632,20 @@ mj.nextAI = function(position, set){
 
 	var groupSet = this.winningHand(position,set);
 
-	var probSet = this.winProb(position,set,groupSet);
+	var lprob = -1;
+	var lindex;
+	_.each(mj[set],function(x,i){
+
+		if(mj.winProb(position,set,x).total > lprob){
+
+			lindex = i;
+			lprob = mj.winProb(position,set,x).total;
+		}
+	})
+
+	if(lprob > 0){
+		return lindex;
+	}
 
 	realSet.push(groupSet[3])
 	realSet.push(groupSet[4]);
@@ -585,10 +700,21 @@ mj.nextAI = function(position, set){
 	var keyArray = _.keys(sortedList);
 	var lowestKey = keyArray[0];
 	var lowestArray = sortedList[lowestKey];
-	var lowestArray = _.shuffle(lowestArray);
-	var playThis = lowestArray[0];
+	var avg = 0;
+	var playIndex = 0;
+	
 
+	_.each(AISet,function(x,i){
+		var temp = mj.getAvg(AISet,i);
+		if(avg < temp){
+			avg = temp;
+			playIndex = i;
+		}
+	})
+
+	var playThis = AISet[playIndex];
 	console.log(playThis);
+	console.log(avg);
 
 	for (var i=0;i<this[set].length;i++){
 		if(playThis.cardName === this[set][i]){
@@ -597,10 +723,25 @@ mj.nextAI = function(position, set){
 	}
 };
 
-mj.winProb = function(position,set){
+
+//Get average points for the nested Sets, sans a specific index
+mj.getAvg = function(nestedSet,withoutIndex){
+	var total = 0;
+	_.each(nestedSet, function(x,i){
+		if(i !== withoutIndex){
+			total = total + x.cardVal;
+		}
+	})
+	return total/(nestedSet.length-1);
+}
+
+
+
+//Winning Probility
+mj.winProb = function(position,set,piece){
 	var mj = this;
-	var winSet = mj.winningHand(position,set,false,true,mj[position+'Last']);
-	var revWinSet = mj.winningHand(position,set,true,true,mj[position+'Last']);
+	var winSet = mj.winningHand(position,set,false,true,piece);
+	var revWinSet = mj.winningHand(position,set,true,true,piece);
 	var need = [];
 
 	var getNeed = function(nestedSet){
@@ -616,11 +757,11 @@ mj.winProb = function(position,set){
 
 			if(xkey === ykey){
 				if(xvalue - yvalue === 1 ){
-					need.push(ykey+'-'+(yvalue-1));
-					need.push(xkey+'-'+(-xvalue+1));
+					if(yvalue > 1) need.push(ykey+'-'+(parseInt(yvalue)-1));
+					if(xvalue < 9) need.push(xkey+'-'+(parseInt(xvalue)+1));
 				} else if(xvalue - yvalue === -1 ){
-					need.push(ykey+'-'+(xvalue-1));
-					need.push(xkey+'-'+(-yvalue+1));
+					if(xvalue > 1) need.push(ykey+'-'+(parseInt(xvalue)-1));
+					if(yvalue < 9) need.push(xkey+'-'+(parseInt(yvalue)+1));
 				}
 			}
 
@@ -631,7 +772,6 @@ mj.winProb = function(position,set){
 	getNeed(revWinSet);
 	need = _.flatten(need);
 	need = _.uniq(need);
-	console.log(need);
 
 	var answer = {total: 0};
 
@@ -890,7 +1030,7 @@ mj.winningHand = function(position,set,reverse,pop,piece){
 
 mj.test = ["bamboo-4", "bamboo-4", "bamboo-5", 
 					"bamboo-5","bamboo-6", "bamboo-6", 
-					"man-3","man-3",
+					"man-8","man-9",
 					"pin-3","pin-3","man-3"];
 mj.Pongtest = ['man-7','man-7','man-7'];
 
@@ -913,7 +1053,7 @@ mj.win = function(position,sets){
 
 	var result = this.winningHand(position,sets);
 	if(!result[0]){
-		result = this.winningHand(position,sets);
+		result = this.winningHand(position,sets,true);
 	}
 	for(var i=0;i<result[1].length;i++){
 		var mj = '<img id="wCard" src="../graphics/'+result[1][i]+'.png"></img>';
