@@ -320,43 +320,87 @@ mj.pongAI = function(position){
 	}
 
 	var currentProb = mj.winProb(position,set,false);
-	console.log(mj[set]);
-	console.log('current Prob ===============')
-	console.log(currentProb);
+
+	if(DevStatus){
+		console.log(mj[set]);
+		console.log('current Prob ===============')
+		console.log(currentProb);
+	}
 
 	var nextProb = -1;
 
 	var target = mj.playedSets[mj.playedSets.length-1]
-	if(set === 'test') target = 'bamboo-4'
+	if(set === 'test') target = mj.testPong;
 
-	console.log('Should we pong '+target+'?');
+	if(DevStatus){
+		console.log('Should we pong '+target+'?');
+	}
 
 	mj[set] = _.without(mj[set], target);
-	console.log('If we do, we will have...');
-	console.log(mj[set]);
+	this['Pong'+set].push(target);
+	this['Pong'+set].push(target);
+	this['Pong'+set].push(target);
+
+	if(DevStatus){
+		console.log(this['Pong'+set])
+		console.log('If we do, we will have...');
+		console.log(mj[set]);
+	}
 
 	_.each(mj[set],function(x,i){
 		var temp = mj.winProb(position,set,x);
-		console.log(temp);
+		//console.log(temp);
 		if(temp.total > nextProb){
 			nextProb = mj.winProb(position,set,x).total;
 		}
 	});
 
+	mj['Pong'+set] = _.without(mj['Pong'+set], target);
 	mj[set].push(target);
 	mj[set].push(target);
-	console.log(currentProb.total)
-	console.log(nextProb);
+	if(DevStatus){
+		console.log(currentProb.total)
+		console.log(nextProb);
+	}
+	mj[set].sort();
 
-	if(currentProb.total!== 0 && nextProb !== 0){
+	if(currentProb.total!== 0 || nextProb !== 0){
+		
 		return nextProb >= currentProb.total;
+	
 	}
 
 
+	var cAvg1 = mj.winningHand(position,set)
+	var cAvg2 = mj.winningHand(position,set,true);
+	var cTest1 = cAvg1[1].length*3+cAvg1[2].length*3+cAvg1[3].length*2+cAvg1[4].length;
+	var cTest2 = cAvg2[1].length*3+cAvg2[2].length*3+cAvg2[3].length*2+cAvg2[4].length;
+	var cTest = cTest1 > cTest2 ? cTest1 : cTest2;
 
+	if(DevStatus){
+		console.log('If we do not pong, our score is...')
+		console.log(cTest);
+	}
+	
+	mj[set] = _.without(mj[set], target);
+		
+	var nAvg1 = mj.winningHand(position,set)
+	var nAvg2 = mj.winningHand(position,set,true);
+	var nTest1 = nAvg1[1].length*3+nAvg1[2].length*3+nAvg1[3].length*2+nAvg1[4].length+9;
+	var nTest2 = nAvg2[1].length*3+nAvg2[2].length*3+nAvg2[3].length*2+nAvg2[4].length+9;
+	var nTest = nTest1 > nTest2 ? nTest1 : nTest2;
 
-	return true;
+	mj[set].push(target);
+	mj[set].push(target);
+	mj[set].sort();
 
+	if(DevStatus){
+		console.log('If we do pong, our score is...');
+		console.log(nTest)
+		console.log('And to show that mj[set] is back to normal...');
+		console.log(mj[set]);
+	}
+	return nTest >= cTest;
 
 }
 
@@ -386,7 +430,7 @@ mj.returnScore = function(set){
 				var compare = AISet[j]
 				if(select.cardType === compare.cardType){
 					if(select.cardNum === compare.cardNum){
-						select.cardVal = select.cardVal+2;
+						select.cardVal = select.cardVal+1;
 						times++;
 						if(times === 1){select.cardVal = select.cardVal+1;}
 						if(times === 2){select.cardVal = select.cardVal+1;}
@@ -403,7 +447,6 @@ mj.returnScore = function(set){
 			}
 		}
 	}
-	console.log(AISet);
 	return AISet;
 }
 
@@ -732,7 +775,17 @@ mj.getAvg = function(nestedSet,withoutIndex){
 			total = total + x.cardVal;
 		}
 	})
-	return total/(nestedSet.length-1);
+	//console.log(nestedSet);
+
+
+
+	if(!withoutIndex) {
+		//console.log(total/nestedSet.length);
+		return total/nestedSet.length;
+	} else {
+		//console.log(total/(nestedSet.length-1));
+		return total/(nestedSet.length-1);
+	}
 }
 
 
@@ -743,6 +796,9 @@ mj.winProb = function(position,set,piece){
 	var winSet = mj.winningHand(position,set,false,true,piece);
 	var revWinSet = mj.winningHand(position,set,true,true,piece);
 	var need = [];
+
+	//console.log(winSet);
+	//console.log(revWinSet);
 
 	var getNeed = function(nestedSet){
 		var pairs = nestedSet[3];
@@ -787,6 +843,9 @@ mj.winProb = function(position,set,piece){
 	knowSet.push(mj.PonglSets);
 	knowSet.push(mj.PongrSets);
 	knowSet.push(mj.PonguSets);
+	if(set === 'test'){
+		knowSet.push(mj.Pongtest);
+	}
 	knowSet.push(mj.playedSets);
 	knowSet = _.flatten(knowSet);
 
@@ -1031,13 +1090,14 @@ mj.winningHand = function(position,set,reverse,pop,piece){
 
 };
 
-mj.test = ["bamboo-4", "bamboo-4", "bamboo-5", 
-					"bamboo-5","bamboo-6", "bamboo-6", 
-					"bamboo-7","bamboo-7",
-					"pin-9","pin-3"];
+mj.test = ["bamboo-1", "bamboo-2", "bamboo-3", 
+					"bamboo-3", "bamboo-5", "bamboo-5", 
+					"pin-1","pin-2",
+					"pin-3","pin-9"];
 mj.Pongtest = ['man-7','man-7','man-7'];
-
-mj.testLast = 'man-3'
+mj.testPong = 'bamboo-3';
+mj.testLast = 'bamboo-6'
+mj.test.sort();
 
 
 //Winning Screen
@@ -1191,6 +1251,9 @@ mj.next = function(position, draw){
 
 	if(draw === false) {
 
+	} else if (mj.gameSets.length < 5){
+		mj.currentPos = 'over';
+		mj.win('No Body');
 	} else {
 			mj[set].push(mj.gameSets.pop());
 			mj.displayGameSets();
