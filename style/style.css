@@ -48,7 +48,7 @@ div#winning {
 
 table#winning {
 	border: 3px solid;
-	width: 215px;
+	width: 300px;
 	margin: 25px auto 0 auto;
 	font-family: Fontdiner Swanky;
 	font-size: 25px;
@@ -61,6 +61,12 @@ table#winning td {
 
 table#winning td#number {
 	text-align: right;
+	color: rgb(215, 199, 121);
+}
+
+table#winning td#bank {
+	text-align: right;
+	padding-left: 15px;
 }
 
 img#jackpot {

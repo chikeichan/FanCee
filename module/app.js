@@ -120,6 +120,10 @@ mj.initialize = function(){
 	mj.PonguSets = [];
 	mj.PonglSets = [];
 	showOppo = false;
+	mj.mePoints = 0;
+	mj.rightPoints = 0;
+	mj.upPoints = 0;
+	mj.leftPoints = 0;
 
 
 	mj.gameSets = mj.shuffleSets();
@@ -162,10 +166,14 @@ mj.PongrSets = [];
 mj.PonguSets = [];
 mj.PonglSets = [];
 mj.house = '';
-mj.mePoints = 100;
-mj.rightPoints = 100;
-mj.upPoints = 100;
-mj.leftPoints = 100;
+mj.mePoints = 0;
+mj.rightPoints = 0;
+mj.upPoints = 0;
+mj.leftPoints = 0;
+mj.meMoney = 50;
+mj.rightMoney = 50;
+mj.upMoney = 50;
+mj.leftMoney = 50;
 
 
 //Starting at player's position, each position takes turn getting a card counter clockwise
@@ -1336,17 +1344,29 @@ mj.win = function(position,sets){
 			
 		_.delay(function(){	
 			_.each(winds,function(pos){
+				var color;
+
 		  	if(pos === position){
 		  		mj[pos+'Points'] = mj[pos+'Points'] + winnings+ winnings+ winnings;
+		  		mj[pos+'Money'] = mj[pos+'Money'] + mj[pos+'Points'];
 
 		  	} else {
 		  		mj[pos+'Points'] = mj[pos+'Points'] - winnings;
+		  		mj[pos+'Money'] = mj[pos+'Money'] + mj[pos+'Points'];
 		  	}
 		  	//console.log(pos+':'+mj[pos+'Points']);
+		  	if(mj[pos+"Points"] > 0) {
+		  		color = 'green';
+		  	} else {
+		  		color = 'red';
+		  	}
 		  	$('table#winning').append('<tr>'+
 		  													'<td>'+pos+'</td>'+
-		  													'<td id="number">'+mj[pos+"Points"]+'</td>'+
+		  													'<td id="number"><font color="'+color+'">'+mj[pos+"Points"]+'</font></td>'+
+		  													'<td id="bank">'+mj[pos+"Money"]+'</td>'+
 		  													'</td>');
+
+		  	
 		  })
 	  },2500)
 	} else {
@@ -1355,12 +1375,13 @@ mj.win = function(position,sets){
 			//console.log(mj[pos+"Points"])
 	  	$('table#winning').append('<tr>'+
 	  													'<td>'+pos+'</td>'+
-	  													'<td id="number">'+mj[pos+"Points"]+'</td>'+
+	  													'<td id="bank">'+mj[pos+"Money"]+'</td>'+
 	  													'</td>');
 	  })
 	  
 
 	}
+
 
 
 }
@@ -1458,15 +1479,6 @@ mj.next = function(position, draw){
 
 //DOM Manipulation and Interactions
 $(document).ready(function(){
-	/*
-	mj.gameSets = mj.shuffleSets();
-	mj.readySets();
-	mj.displayGameSets();
-	mj.refresh('me');
-	mj.refresh('left');
-	mj.refresh('right');
-	mj.refresh('up');
-	*/
 
 	mj.initialize();
 
