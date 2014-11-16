@@ -1535,6 +1535,18 @@ $(document).ready(function(){
 	})
 
 	$(document).on('click','img#me',function(){
+		$('img#selected').attr('id','me');
+		$('img#me').stop().animate({
+			'top': '0px'
+		},100);
+		$(this).attr('id','selected')
+		$(this).stop().animate({
+			'top': '-20px'
+		},100);
+	});
+
+	
+	$(document).on('click','#selected',function(){
 		if(mj.currentPos === 'me') {
 			var set = mj.readSet(this.src);
 			var setStr = set[0]+'-'+set[1];
@@ -1562,7 +1574,7 @@ $(document).ready(function(){
 			}
 		}
 	})
-
+	
 
 
 

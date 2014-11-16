@@ -139,6 +139,15 @@ img#me {
 	position: relative;
 	margin-left: -16px;
 	width: 51px;
+	top: 0px;
+	z-index: 4;
+}
+
+img#selected {
+	position: relative;
+	margin-left: -16px;
+	width: 51px;
+	top: -20px;
 	z-index: 4;
 }
 
