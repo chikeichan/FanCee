@@ -845,56 +845,112 @@ mj.stealaKong = function(position,piece){
 
 mj.aKong = function(position,set,last){
 
-		
-			mj[set].sort();
-			mj[set] = _.without(mj[set],last);
+			var need = [];
+			var key = last.split('-')[0];
+			var val = parseInt(last.split('-')[1]);
+
+			var answer = {total: 0};
+
+			if(key!== 'wind' && key !=='zdragon'){
+				if(val > 1) need.push(key+'-'+(val-1));
+				if(val < 9) need.push(key+'-'+(val+1));
+
+				
+
+				_.each(need,function(x,i){
+					answer[x] = 4;
+					answer.total = answer.total + 4;
+				})
+
+				var knowSet = mj[set].slice();
+				knowSet.push(mj.PongmySets);
+				knowSet.push(mj.PonglSets);
+				knowSet.push(mj.PongrSets);
+				knowSet.push(mj.PonguSets);
+				if(set === 'test'){
+					knowSet.push(mj.Pongtest);
+				}
+				knowSet.push(mj.playedSets);
+				knowSet = _.flatten(knowSet);
 
 
-			mj['Pong'+set].push(last);
+				_.each(need,function(set,index){
+					_.each(knowSet,function(exist,i){
+						if(set === exist){
+							answer[set]--;
+							answer.total --;
+						}
+					})
+				})
 
-			mj.refresh(position);
-			mj.displayPong(mj['Pong'+set],position);
-
-			if(mj.stealaKong(position,last)){
-				return;
+				console.log(need)
+				console.log(answer);
 			}
 
-			mj[position+'Points'] = mj[position+'Points'] + 3;
-			console.log(mj[position+'Points'])
-			var winds = ['me','up','right','left'];
-			_.each(winds,function(x,i){
-				if(x!== position){
-					mj[x+'Points'] = mj[x+'Points'] - 1;
+			var threshold = 99;
+			if(mj.gameSets < 41){
+				threshold = 4;
+			} if (mj.gameSets <21){
+				threshold = 1;
+			}
+
+			console.log(threshold);
+			console.log(answer.total);
+
+			if(answer.total < threshold || position === 'me'){
+
+		
+				mj[set].sort();
+				mj[set] = _.without(mj[set],last);
+
+
+				mj['Pong'+set].push(last);
+
+				mj.refresh(position);
+				mj.displayPong(mj['Pong'+set],position);
+
+				if(mj.stealaKong(position,last)){
+					return;
 				}
-			})
 
-
-
-			_.delay(function(){
-				if(position === 'right'){
-					mj.currentPos = 'right';
-					mj.next('right',true);
-				} else if (position === 'left'){
-					mj.currentPos = 'left';
-					mj.next('left',true);
-				} else if (position === 'up') {
-					mj.currentPos = 'up';
-					mj.next('up',true);
-				} else if (position === 'me') {
-					mj.currentPos = 'me';
-					var last = mj.gameSets.pop();
-					mj.mySets.push(last);
-					mj.displayGameSets();
-					mj.refresh('me');
-					mj.displayPong(mj['PongmySets'],'me');
-					if(mj.ifWinLoop(mj['mySets'])[0]){
-						mj.win('me','mySets');
-						return;
+				mj[position+'Points'] = mj[position+'Points'] + 3;
+				console.log(mj[position+'Points'])
+				var winds = ['me','up','right','left'];
+				_.each(winds,function(x,i){
+					if(x!== position){
+						mj[x+'Points'] = mj[x+'Points'] - 1;
 					}
-					mj.ifSpecialKong('me','mySets',last);
-				}
-			},intv());
-	
+				})
+
+
+
+				_.delay(function(){
+					if(position === 'right'){
+						mj.currentPos = 'right';
+						mj.next('right',true);
+					} else if (position === 'left'){
+						mj.currentPos = 'left';
+						mj.next('left',true);
+					} else if (position === 'up') {
+						mj.currentPos = 'up';
+						mj.next('up',true);
+					} else if (position === 'me') {
+						mj.currentPos = 'me';
+						var last = mj.gameSets.pop();
+						mj.mySets.push(last);
+						mj.displayGameSets();
+						mj.refresh('me');
+						mj.displayPong(mj['PongmySets'],'me');
+						if(mj.ifWinLoop(mj['mySets'])[0]){
+							mj.win('me','mySets');
+							return;
+						}
+						mj.ifSpecialKong('me','mySets',last);
+					}
+				},intv());
+			} else {
+				mj.next(position,false);
+			}
 }
 
 
@@ -934,6 +990,7 @@ mj.listenPong = function(position){
 	}
 } else {
 		mj.addOneBack = false;
+		mj.KongStatus = 'none';
 		$('div#panel').fadeIn(200);
 	}
 }
@@ -980,6 +1037,7 @@ mj.listenKong = function(position){
 	}
 } else {
 		mj.addOneBack = true;
+		mj.KongStatus = 'none';
 		$('div#panel').fadeIn(200);
 	}
 }
@@ -2133,6 +2191,8 @@ $(document).ready(function(){
 					index = i;
 					return x === setStr;
 			})
+
+			$('div#panel').fadeOut(200);
 			
 
 			mj.mySets.splice(index,1);
