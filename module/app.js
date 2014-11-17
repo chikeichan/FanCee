@@ -647,7 +647,7 @@ mj.kong = function(position){
 				mj.displayGameSets();
 				mj.refresh('me');
 				mj.displayPong(mj['PongmySets'],'me');
-				if(mj.winningHand('me','mySets')[0]|| mj.winningHand('me','mySets',true)[0]){
+				if(mj.ifWinLoop(mj['mySets'])[0]){
 					mj.win('me','mySets');
 					return;
 				}
@@ -675,7 +675,7 @@ mj.listenPong = function(position){
 					mj.mySets.push(mj.gameSets.pop());
 					mj.refresh('me');
 					mj.displayPong(mj['PongmySets'],'me');
-					if(mj.winningHand('me','mySets')[0]|| mj.winningHand('me','mySets',true)[0]){
+					if(mj.ifWinLoop(mj['mySets'])[0]){
 						mj.win('me','mySets');
 						return;
 					}
@@ -719,7 +719,7 @@ mj.listenKong = function(position){
 					mj.mySets.push(mj.gameSets.pop());
 					mj.refresh('me');
 					mj.displayPong(mj['PongmySets'],'me');
-					if(mj.winningHand('me','mySets')[0]|| mj.winningHand('me','mySets',true)[0]){
+					if(mj.ifWinLoop(mj['mySets'])[0]){
 						mj.win('me','mySets');
 						return;
 					}
@@ -963,6 +963,8 @@ mj.winProb = function(position,set,piece){
 
 }
 
+//
+
 
 mj.winningHand = function(position,set,reverse,pop,piece){
 	var result = false;
@@ -1189,11 +1191,144 @@ mj.winningHand = function(position,set,reverse,pop,piece){
 
 };
 
-mj.test = ["bamboo-1", "bamboo-2", "bamboo-3", 
-					"bamboo-3", "bamboo-5", "bamboo-5", 
-					"pin-1","pin-2",
-					"pin-3","pin-9"];
-mj.Pongtest = ['man-7','man-7','man-7'];
+
+//New winning logic
+mj.ifWin = function(setArray,index){
+	var seq = [];
+	var threes = [];
+	var pairs = [];
+	var singles = [];
+	var result = false;
+	var test= setArray.slice().sort();
+
+	//console.log(test);
+
+	var test = setArray.slice(index,setArray.length);
+	test.push(setArray.slice(0,index));
+	test = _.flatten(test);
+
+	//console.log(test);
+
+	var findAndReplace = function(find,testArray){
+		var dup = false;
+		_.each(testArray,function(set,i){
+			if(find===set && !dup){
+				testArray.splice(i,1);
+				dup = true;
+			}
+		})
+		return testArray;
+	}
+
+	var findSets = function(sets) {
+		var repeat = 0;
+		var consec = 0;
+
+		if(sets.length === 2 && singles.length === 0){
+
+			pairs = [sets[0],sets[1]]
+			result = sets[0]===sets[1];			
+
+		} else {
+			for (var i=1;i<sets.length;i++){
+				var pkey = sets[i-1].split('-')[0];
+				var pval = sets[i-1].split('-')[1];
+				var key = sets[i].split('-')[0];
+				var val = sets[i].split('-')[1];
+
+				if(key === pkey && val === pval){
+					repeat++;
+					if(repeat === 2){
+
+						if(i<sets.length-1 && consec === 1 ){
+							var nkey = sets[i+1].split('-')[0];
+							var nval = sets[i+1].split('-')[1];
+
+							if(nkey === key && nval-val === 1){
+								repeat = 0;
+								consec = 0;
+								ppval = (val-1).toString();
+								var temp = [key+'-'+ppval,key+'-'+val,key+'-'+nval]
+								
+								_.each(temp,function(x,j){
+									sets = findAndReplace(x,sets);
+									seq.push(x);
+								})
+								findSets(sets);
+							} else {
+								repeat = 0;
+								consec = 0;
+								var temp = [key+'-'+val,key+'-'+val,key+'-'+val]
+								
+								_.each(temp,function(x,j){
+									sets = findAndReplace(x,sets);
+									threes.push(x);
+								})
+								findSets(sets);
+							}
+						} else {
+							repeat = 0;
+							consec = 0;
+							var temp = [key+'-'+val,key+'-'+val,key+'-'+val]
+							
+							_.each(temp,function(x,j){
+								sets = findAndReplace(x,sets);
+								threes.push(x);
+							})
+							findSets(sets);
+						}
+					}
+				} else if(key===pkey && key !== 'zdragon' && key !== 'wind' && val-pval == 1){
+					repeat = 0;
+					consec++;
+					if(consec === 2){
+						repeat = 0;
+						consec = 0;
+						ppval = (val-2).toString();
+
+						var temp = [key+'-'+ppval,key+'-'+pval,key+'-'+val]
+						
+						_.each(temp,function(x,j){
+							sets = findAndReplace(x,sets);
+							seq.push(x);
+						})
+						findSets(sets);
+					}
+				} else {
+					repeat = 0;
+					consec = 0;
+					var temp = pkey+'-'+pval;
+					
+					sets = findAndReplace(temp,sets);
+					singles.push(temp);
+					findSets(sets);
+				}
+			}
+		}
+	}
+
+	findSets(test);
+
+	return [result,seq,threes,pairs,singles];
+
+}
+
+mj.ifWinLoop = function(setArray){
+	for(var i=0;i<setArray.length;i++){
+		var result = mj.ifWin(setArray,i);
+		if(result[0]){
+			return result;
+		}
+	}
+	return [false];
+}
+
+mj.test = ["bamboo-1", "bamboo-1", "bamboo-1", 
+					"bamboo-2", "bamboo-3", "bamboo-4", 
+					"bamboo-5","bamboo-6","bamboo-7",
+					"bamboo-8","bamboo-9","bamboo-9",
+					"bamboo-9","bamboo-5"];
+mj.Pongtest = [];
 mj.testPong = 'bamboo-3';
 mj.testLast = 'bamboo-6'
 mj.test.sort();
@@ -1219,10 +1354,8 @@ mj.win = function(position,sets){
 
 	if(position !== "No Body") {
 
-		var result = this.winningHand(position,sets);
-		if(!result[0]){
-			result = this.winningHand(position,sets,true);
-		}
+		var result = mj.ifWinLoop(mj[sets]);
+		
 		for(var i=0;i<result[1].length;i++){
 			var mj = '<img id="wCard" src="../graphics/'+result[1][i]+'.png"></img>';
 			$('.wSet').append(mj);
@@ -1402,7 +1535,12 @@ mj.next = function(position, draw){
 		mj.currentPos = 'me';
 	}
 
-
+	if (mj.gameSets.length < 5) {
+		mj.currentPos = 'over';
+		mj.displayGameSets();
+		mj.win('No Body');
+		return;
+	}
 
 	if(draw === false) {
 
@@ -1411,13 +1549,18 @@ mj.next = function(position, draw){
 			mj.displayGameSets();
 			mj.refresh(position);
 			mj.displayPong(mj['Pong'+set],position);
-			if(mj.winningHand(position,set)[0] || mj.winningHand(position,set,true)[0]){
+			if(mj.ifWinLoop(mj[set])[0]){
 				mj.win(position,set);
 			return;
 		}
 	}
 
-	
+	if (mj.gameSets.length < 5) {
+		mj.currentPos = 'over';
+		mj.displayGameSets();
+		mj.win('No Body');
+		return;
+	}
 
 	var index = mj.nextAI(position, set);
 
@@ -1433,11 +1576,7 @@ mj.next = function(position, draw){
 	mj.refresh(position);
 	mj.displayPong(mj['Pong'+set],position);
 
-	if (mj.gameSets.length < 5) {
-		mj.currentPos = 'over';
-		mj.win('No Body');
-		return;
-	}
+	
 
 
 	if(mj.ifPause(position)[0]==='pong'){
@@ -1460,8 +1599,14 @@ mj.next = function(position, draw){
 					
 					mj.refresh('me');
 					mj.displayPong(mj['PongmySets'],'me');
-					if(mj.winningHand('me','mySets')[0]|| mj.winningHand('me','mySets',true)[0]){
+					if(mj.ifWinLoop(mj['mySets'])[0]){
 						mj.win('me','mySets');
+						return;
+					}
+					if (mj.gameSets.length < 5) {
+						mj.currentPos = 'over';
+						mj.displayGameSets();
+						mj.win('No Body');
 						return;
 					}
 				} else if (position === 'up') {
@@ -1529,7 +1674,7 @@ $(document).ready(function(){
 					mj.mySets.push(mj.gameSets.pop());
 					mj.refresh('me');
 					mj.displayPong(mj['PongmySets'],'me');
-					if(mj.winningHand('me','mySets')[0]|| mj.winningHand('me','mySets',true)[0]){
+					if(mj.ifWinLoop(mj['mySets'])[0]){
 						mj.win('me','mySets');
 						return;
 					}
