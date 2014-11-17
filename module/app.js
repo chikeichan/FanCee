@@ -1551,10 +1551,20 @@ mj.win = function(position,sets){
 
 }
 //calcualte interval score
-var intv = function(){
-	if(mj.gameSets.length>60){
-		return 100;
-	} else if(mj.gameSets.length >30){
+var intv = function(pos){
+	var pSet;
+	if(pos === "right"){
+		pSet = mj.PonguSets
+	} else if(pos==='up'){
+		pSet = mj.PonglSets;
+	} else if (pos === 'left'){
+		pSet = mj.PongmySets;
+	} else if (pos === 'me'){
+		pSet = mj.PongrSets;
+	}
+	if(pSet.length===0){
+		return 50;
+	} else if(pSet.length <6){
 		return 300;
 	} else {
 		return 500;
@@ -1655,7 +1665,7 @@ mj.next = function(position, draw){
 					mj.next('left');
 				}
 			}
-		},intv());
+		},intv(position));
 	}
 
 }
@@ -1770,7 +1780,7 @@ $(document).ready(function(){
 			} else {
 				_.delay(function(){
 					mj.next('right');
-				},intv());
+				},intv('me'));
 			}
 		}
 	})
