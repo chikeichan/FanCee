@@ -32,7 +32,7 @@ div#winning {
 }
 
 .wSet {
-	width: 520px;
+	width: 545px;
 	margin: 0 auto 0 auto;
 	position: relative;
 	top: 5px;
@@ -96,7 +96,7 @@ div#replay {
 
 
 div#me {
-	width: 550px;
+	width: 563px;
 	height: 50px;
 	position: absolute;
 	top: 630px;
@@ -104,7 +104,7 @@ div#me {
 }
 
 div#left {
-	width: 550px;
+	width: 563px;
 	height: 50px;
 	position: absolute;
 	top: 325px;
@@ -113,7 +113,7 @@ div#left {
 }
 
 div#right {
-	width: 550px;
+	width: 563px;
 	height: 50px;
 	position: absolute;
 	top: 325px;
@@ -122,7 +122,7 @@ div#right {
 }
 
 div#up {
-	width: 550px;
+	width: 563px;
 	height: 50px;
 	position: absolute;
 	top: 20px;
