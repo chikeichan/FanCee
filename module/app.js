@@ -133,6 +133,10 @@ mj.initialize = function(){
 	mj.upCover = '';
 	mj.rightCover = '';
 	mj.leftCover = '';
+	mj.mepCover = '';
+	mj.uppCover = '';
+	mj.rightpCover = '';
+	mj.leftpCover = '';
 
 
 
@@ -185,6 +189,10 @@ mj.meCover = '';
 mj.upCover = '';
 mj.rightCover = '';
 mj.leftCover = '';
+mj.mepCover = '';
+mj.uppCover = '';
+mj.rightpCover = '';
+mj.leftpCover = '';
 mj.mePoints = 0;
 mj.rightPoints = 0;
 mj.upPoints = 0;
@@ -407,7 +415,7 @@ mj.ifPause = function(position){
 			pause = 'kong';
 			playerPause = player;
 		}
-		console.log(dup);
+	
 	});
 
 	if(playerPause === 'lSets'){
@@ -420,7 +428,7 @@ mj.ifPause = function(position){
 		playerPause = 'me'
 	}
 
-	console.log(pause)
+	
 	return [pause, playerPause];
 }
 
@@ -636,6 +644,11 @@ mj.pong = function(position, addOneBack){
 	if(addOneBack){
 		mj[set].push(slastSet);
 	}
+
+	var length = _.uniq(mj['Pong'+set]).length;
+	if(length>=4){
+		mj[position+'pCover'] = mj.currentPos;
+	}
 	
 	mj.refresh(position);
 	mj.displayPong(mj['Pong'+set],position);
@@ -711,10 +724,177 @@ mj.kong = function(position){
 					mj.win('me','mySets');
 					return;
 				}
+				mj['meCover'] = '';
 				mj.ifSpecialKong('me','mySets',last);
 			}
 	},intv());
 
+}
+//
+
+mj.sKong = function(position,set,last){
+	
+		
+			mj[set].sort();
+			mj[set] = _.without(mj[set],last);
+
+			mj['Pong'+set].push('facedown');
+			mj['Pong'+set].push('facedown');
+			mj['Pong'+set].push('facedown');
+			mj['Pong'+set].push('facedown');
+
+			mj['sKong'+set].push(last);
+			mj['sKong'+set].push(last);
+			mj['sKong'+set].push(last);
+			mj['sKong'+set].push(last);
+			
+
+			mj.refresh(position);
+			mj.displayPong(mj['Pong'+set],position);
+
+			mj[position+'Points'] = mj[position+'Points'] + 6;
+			console.log(mj[position+'Points'])
+			var winds = ['me','up','right','left'];
+			_.each(winds,function(x,i){
+				if(x!== position){
+					mj[x+'Points'] = mj[x+'Points'] - 2;
+				}
+			})
+
+
+			_.delay(function(){
+				if(position === 'right'){
+					mj.currentPos = 'right';
+					mj.next('right',true);
+				} else if (position === 'left'){
+					mj.currentPos = 'left';
+					mj.next('left',true);
+				} else if (position === 'up') {
+					mj.currentPos = 'up';
+					mj.next('up',true);
+				} else if (position === 'me') {
+					mj.currentPos = 'me';
+					var last = mj.gameSets.pop();
+					mj.mySets.push(last);
+					mj.displayGameSets();
+					mj.refresh('me');
+					mj.displayPong(mj['PongmySets'],'me');
+					if(mj.ifWinLoop(mj['mySets'])[0]){
+						mj.win('me','mySets');
+						return;
+					}
+					mj.ifSpecialKong('me','mySets',last);
+				}
+			},intv());
+	
+}
+
+mj.stealaKong = function(position,piece){
+	var steal = false;
+	var setStolen;
+	var posStolen;
+	var players;
+		if(position === 'right'){
+			players = ['lSets','mySets','uSets'];
+		} else if (position === 'left'){
+			players = ['rSets','mySets','uSets'];
+		} else if (position === 'up') {
+			players = ['lSets','mySets','rSets'];
+		} else if (position === 'me') {
+			players = ['lSets','uSets','rSets'];
+		}
+
+		
+
+	_.each(players,function(setStr,i){
+		var adjSet = mj[setStr].slice();
+		
+		adjSet.push(piece);
+		adjSet.sort();
+
+		if(mj.ifWinLoop(adjSet)[0]){
+			steal = true;
+			setStolen = setStr;
+		}
+	})
+
+	
+	if(steal){
+		if(setStolen === 'lSets'){
+			posStolen = 'left'
+		} else if(setStolen === 'rSets'){
+			posStolen = 'right'
+		} else if(setStolen === 'uSets'){
+			posStolen = 'up'
+		} else if(setStolen === 'mySets'){
+			posStolen = 'me'
+		}
+
+		mj[posStolen+'pCover']= position;
+
+		mj[setStolen].push(piece);
+		mj.win(posStolen,setStolen);
+		mj.currentPos = 'win';
+		return true;
+
+	}
+
+	return steal;
+
+}
+
+mj.aKong = function(position,set,last){
+
+		
+			mj[set].sort();
+			mj[set] = _.without(mj[set],last);
+
+
+			mj['Pong'+set].push(last);
+
+			mj.refresh(position);
+			mj.displayPong(mj['Pong'+set],position);
+
+			if(mj.stealaKong(position,last)){
+				return;
+			}
+
+			mj[position+'Points'] = mj[position+'Points'] + 3;
+			console.log(mj[position+'Points'])
+			var winds = ['me','up','right','left'];
+			_.each(winds,function(x,i){
+				if(x!== position){
+					mj[x+'Points'] = mj[x+'Points'] - 1;
+				}
+			})
+
+
+
+			_.delay(function(){
+				if(position === 'right'){
+					mj.currentPos = 'right';
+					mj.next('right',true);
+				} else if (position === 'left'){
+					mj.currentPos = 'left';
+					mj.next('left',true);
+				} else if (position === 'up') {
+					mj.currentPos = 'up';
+					mj.next('up',true);
+				} else if (position === 'me') {
+					mj.currentPos = 'me';
+					var last = mj.gameSets.pop();
+					mj.mySets.push(last);
+					mj.displayGameSets();
+					mj.refresh('me');
+					mj.displayPong(mj['PongmySets'],'me');
+					if(mj.ifWinLoop(mj['mySets'])[0]){
+						mj.win('me','mySets');
+						return;
+					}
+					mj.ifSpecialKong('me','mySets',last);
+				}
+			},intv());
+	
 }
 
 
@@ -1494,9 +1674,9 @@ mj.ifWinLoop = function(setArray){
 	return [false];
 }
 
-mj.test = ["bamboo-5", "bamboo-5", "bamboo-5",
-					"wind-east","pin-7","pin-8",
-					"pin-9","pin-7","pin-8",
+mj.test = ["bamboo-9", "bamboo-9", "bamboo-9",
+					"wind-east","wind-east","wind-east",
+					"wind-west","wind-west","wind-west",
 					"pin-9",'bamboo-1',"pin-9",'bamboo-1'];
 mj.Pongtest = [];
 mj.testPong = 'wind-east';
@@ -1512,6 +1692,7 @@ mj.win = function(position,sets){
 	this.refresh('left');
 	this.refresh('right');
 	this.refresh('up');
+	this.refresh('me');
 
 
 	this.PonglSets = _.without(this.PonglSets,'facedown');
@@ -1533,7 +1714,7 @@ mj.win = function(position,sets){
 	this.displayPong(this['PonglSets'],'left');
 	this.displayPong(this['PongrSets'],'right');
 	this.displayPong(this['PonguSets'],'up');
-	this.displayPong(this['PonguSets'],'me');
+	this.displayPong(this['PongmySets'],'me');
 
 	var winds = ['me','right','up','left'];
 	var mj = this;
@@ -1664,30 +1845,31 @@ mj.win = function(position,sets){
 		  $('.wSet').before(jp3);
 		},2000)
 
-			
+
+		_.each(winds,function(pos){
+	  	if(pos === position){
+	  		mj[pos+'Points'] = mj[pos+'Points'] + winnings+ winnings+ winnings;
+	  		
+
+	  	} else {
+	  		var cover = mj[position+'Cover'];
+	  		var pcover = mj[position+'pCover'];
+	  		if(pcover!==''){
+	  			mj[pcover+'Points'] = mj[pcover+'Points'] - winnings;
+	  		} else if(cover!==''){
+	  			mj[cover+'Points'] = mj[cover+'Points'] - winnings;
+	  		} else {
+	  			mj[pos+'Points'] = mj[pos+'Points'] - winnings;
+	  		}
+	  		
+	  	}
+	  })
+
 		_.delay(function(){	
-			_.each(winds,function(pos){
-				var color;
-
-		  	if(pos === position){
-		  		mj[pos+'Points'] = mj[pos+'Points'] + winnings+ winnings+ winnings;
-		  		
-
-		  	} else {
-		  		var cover = mj[position+'Cover']
-		  		if(cover!==''){
-		  			mj[cover+'Points'] = mj[cover+'Points'] - winnings;
-		  		} else {
-		  			mj[pos+'Points'] = mj[pos+'Points'] - winnings;
-		  		}
-		  		
-		  	}
-		  })
-
-
+			var color;
 
 		  _.each(winds,function(pos){
-		  	//console.log(pos+':'+mj[pos+'Points']);
+		  	
 		  	mj[pos+'Money'] = mj[pos+'Money'] + mj[pos+'Points'];
 		  	if(mj[pos+"Points"] > 0) {
 		  		color = 'green';
@@ -1706,7 +1888,7 @@ mj.win = function(position,sets){
 	} else {
 		
 		_.each(winds,function(pos){
-			//console.log(mj[pos+"Points"])
+			
 	  	$('table#winning').append('<tr>'+
 	  													'<td>'+pos+'</td>'+
 	  													'<td id="bank">'+mj[pos+"Money"]+'</td>'+
@@ -1724,113 +1906,6 @@ var intv = function(pos){
 	return 500;
 }
 
-//
-
-mj.sKong = function(position,set,last){
-	
-		
-			mj[set].sort();
-			mj[set] = _.without(mj[set],last);
-
-			mj['Pong'+set].push('facedown');
-			mj['Pong'+set].push('facedown');
-			mj['Pong'+set].push('facedown');
-			mj['Pong'+set].push('facedown');
-
-			mj['sKong'+set].push(last);
-			mj['sKong'+set].push(last);
-			mj['sKong'+set].push(last);
-			mj['sKong'+set].push(last);
-			
-
-			mj.refresh(position);
-			mj.displayPong(mj['Pong'+set],position);
-
-			mj[position+'Points'] = mj[position+'Points'] + 6;
-			console.log(mj[position+'Points'])
-			var winds = ['me','up','right','left'];
-			_.each(winds,function(x,i){
-				if(x!== position){
-					mj[x+'Points'] = mj[x+'Points'] - 2;
-				}
-			})
-
-
-			_.delay(function(){
-				if(position === 'right'){
-					mj.currentPos = 'right';
-					mj.next('right',true);
-				} else if (position === 'left'){
-					mj.currentPos = 'left';
-					mj.next('left',true);
-				} else if (position === 'up') {
-					mj.currentPos = 'up';
-					mj.next('up',true);
-				} else if (position === 'me') {
-					mj.currentPos = 'me';
-					var last = mj.gameSets.pop();
-					mj.mySets.push(last);
-					mj.displayGameSets();
-					mj.refresh('me');
-					mj.displayPong(mj['PongmySets'],'me');
-					if(mj.ifWinLoop(mj['mySets'])[0]){
-						mj.win('me','mySets');
-						return;
-					}
-					mj.ifSpecialKong('me','mySets',last);
-				}
-			},intv());
-	
-}
-
-mj.aKong = function(position,set,last){
-
-		
-			mj[set].sort();
-			mj[set] = _.without(mj[set],last);
-
-
-			mj['Pong'+set].push(last);
-
-			mj.refresh(position);
-			mj.displayPong(mj['Pong'+set],position);
-
-			mj[position+'Points'] = mj[position+'Points'] + 3;
-			console.log(mj[position+'Points'])
-			var winds = ['me','up','right','left'];
-			_.each(winds,function(x,i){
-				if(x!== position){
-					mj[x+'Points'] = mj[x+'Points'] - 1;
-				}
-			})
-
-
-			_.delay(function(){
-				if(position === 'right'){
-					mj.currentPos = 'right';
-					mj.next('right',true);
-				} else if (position === 'left'){
-					mj.currentPos = 'left';
-					mj.next('left',true);
-				} else if (position === 'up') {
-					mj.currentPos = 'up';
-					mj.next('up',true);
-				} else if (position === 'me') {
-					mj.currentPos = 'me';
-					var last = mj.gameSets.pop();
-					mj.mySets.push(last);
-					mj.displayGameSets();
-					mj.refresh('me');
-					mj.displayPong(mj['PongmySets'],'me');
-					if(mj.ifWinLoop(mj['mySets'])[0]){
-						mj.win('me','mySets');
-						return;
-					}
-					mj.ifSpecialKong('me','mySets',last);
-				}
-			},intv());
-	
-}
 
 //Main recursive logic to execute next round of playing until there are only 4
 //cards left in the gamesets
@@ -1868,6 +1943,7 @@ mj.next = function(position, draw){
 			mj.win(position,set);
 			return;
 		}
+		mj[position+'Cover'] = '';
 	}
 
 	if (mj.gameSets.length < 5) {
@@ -2057,6 +2133,8 @@ $(document).ready(function(){
 					index = i;
 					return x === setStr;
 			})
+			
+
 			mj.mySets.splice(index,1);
 			mj.playedSets.push(setStr);
 
