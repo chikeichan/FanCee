@@ -418,7 +418,8 @@ mj.pongAI = function(position){
 		set = 'test';
 	}
 
-	var currentProb = mj.winProb(position,set,false);
+	var currentProb = mj.winProb(position,set);
+
 
 	if(DevStatus){
 		console.log(mj[set]);
@@ -780,6 +781,7 @@ mj.nextAI = function(position, set){
 
 			lindex = i;
 			lprob = mj.winProb(position,set,x).total;
+
 		}
 	})
 
@@ -890,45 +892,68 @@ mj.getAvg = function(nestedSet,withoutIndex){
 
 
 //Winning Probility
+//New Win Prob
 mj.winProb = function(position,set,piece){
 	var mj = this;
-	var winSet = mj.winningHand(position,set,false,true,piece);
-	var revWinSet = mj.winningHand(position,set,true,true,piece);
+	var Set = mj[set].slice();
 	var need = [];
 
-	//console.log(winSet);
-	//console.log(revWinSet);
-
-	var getNeed = function(nestedSet){
-		var pairs = nestedSet[3];
-		var singles = nestedSet[4];
-		if(pairs.length === 4 && singles.length === 0){
-			need.push(_.unique(pairs));
-		} else if (pairs.length === 2 && singles.length === 2){
-			var xkey = singles[0].split('-')[0];
-			var xvalue = singles[0].split('-')[1];
-			var ykey = singles[1].split('-')[0];
-			var yvalue = singles[1].split('-')[1];
-
-			if(xkey === ykey){
-				if(xvalue - yvalue === 1 ){
-					if(yvalue > 1) need.push(ykey+'-'+(parseInt(yvalue)-1));
-					if(xvalue < 9) need.push(xkey+'-'+(parseInt(xvalue)+1));
-				} else if(xvalue - yvalue === -1 ){
-					if(xvalue > 1) need.push(ykey+'-'+(parseInt(xvalue)-1));
-					if(yvalue < 9) need.push(xkey+'-'+(parseInt(yvalue)+1));
-				}
+	var findAndReplace = function(find,testArray){
+		var dup = false;
+		_.each(testArray,function(set,i){
+			if(find===set && !dup){
+				testArray.splice(i,1);
+				dup = true;
 			}
-
-		} else if(pairs.length === 0 && singles.length === 1){
-			need.push(singles);
-		}
+		})
+		return testArray;
 	}
 
-	getNeed(winSet);
-	getNeed(revWinSet);
-	need = _.flatten(need);
-	need = _.uniq(need);
+	var potential = [];
+
+	var getPot = function(){
+		console.log(Set);
+		var calc = _.groupBy(Set,function(x,i){
+			return x.split('-')[0];
+		})
+		
+		_.each(calc,function(arr,type){
+			_.each(arr,function(set,i){
+				potential.push(set);
+				if(type !== 'wind' && type !== 'zdragon'){
+					var val = set.split('-')[1];
+					var pval = set.split('-')[1]-1;
+					var nval = pval+2;
+					if(val!=1)potential.push(type+'-'+pval);
+					if(val!=9)potential.push(type+'-'+nval);
+				}
+			})
+		})
+
+	}
+
+	getPot();
+	potential = _.uniq(potential);
+
+	console.log(potential);
+
+
+	Set = findAndReplace(piece,Set);
+	//console.log(Set);
+
+	_.each(potential,function(potSet,i){
+		Set.push(potSet);
+		Set.sort();
+		
+		if(mj.ifWinLoop(Set)[0]){
+			need.push(potSet);
+			//console.log(Set);
+		}
+		findAndReplace(potSet,Set);
+		Set.sort();
+	})
+
+	//console.log(need);
 
 	var answer = {total: 0};
 
@@ -960,10 +985,17 @@ mj.winProb = function(position,set,piece){
 
 	//console.log(answer);
 	return answer;
-
 }
 
-//
+mj.getString = function(){
+	var result = [];
+	_.each(mj.fullSets,function(x,i){
+		_.each(x,function(y,j){
+			result.push(i+'-'+j);
+		})
+	})
+	return result;
+}
 
 
 mj.winningHand = function(position,set,reverse,pop,piece){
@@ -1323,13 +1355,13 @@ mj.ifWinLoop = function(setArray){
 	return [false];
 }
 
-mj.test = ["bamboo-1", "bamboo-1", "bamboo-1", 
-					"bamboo-2", "bamboo-3", "bamboo-4", 
-					"bamboo-5","bamboo-6","bamboo-7",
-					"bamboo-8","bamboo-9","bamboo-9",
-					"bamboo-9","bamboo-5"];
+mj.test = ["bamboo-2", "bamboo-2", "bamboo-2", 
+					"bamboo-5", "bamboo-6", "wind-east", 
+					"wind-east","pin-7","pin-8",
+					"pin-9","pin-7","pin-8",
+					"pin-9",'wind-east'];
 mj.Pongtest = [];
-mj.testPong = 'bamboo-3';
+mj.testPong = 'wind-east';
 mj.testLast = 'bamboo-6'
 mj.test.sort();
 
@@ -1518,7 +1550,16 @@ mj.win = function(position,sets){
 
 
 }
-
+//calcualte interval score
+var intv = function(){
+	if(mj.gameSets.length>60){
+		return 100;
+	} else if(mj.gameSets.length >30){
+		return 300;
+	} else {
+		return 500;
+	}
+}
 
 //Main recursive logic to execute next round of playing until there are only 4
 //cards left in the gamesets
@@ -1614,10 +1655,12 @@ mj.next = function(position, draw){
 					mj.next('left');
 				}
 			}
-		},500);
+		},intv());
 	}
 
 }
+
+
 
 
 
@@ -1727,7 +1770,7 @@ $(document).ready(function(){
 			} else {
 				_.delay(function(){
 					mj.next('right');
-				},500);
+				},intv());
 			}
 		}
 	})
