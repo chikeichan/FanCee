@@ -764,7 +764,80 @@ var playWood = function(){
 		preSound = true;
 	}
 }
+//Simple WinProb for AI
+//Winning Probility
+mj.simpleWinProb = function(position,set,piece){
+	var mj = this;
+	var winSet = mj.winningHand(position,set,false,true,piece);
+	var revWinSet = mj.winningHand(position,set,true,true,piece);
+	var need = [];
 
+	//console.log(winSet);
+	//console.log(revWinSet);
+
+	var getNeed = function(nestedSet){
+		var pairs = nestedSet[3];
+		var singles = nestedSet[4];
+		if(pairs.length === 4 && singles.length === 0){
+			need.push(_.unique(pairs));
+		} else if (pairs.length === 2 && singles.length === 2){
+			var xkey = singles[0].split('-')[0];
+			var xvalue = singles[0].split('-')[1];
+			var ykey = singles[1].split('-')[0];
+			var yvalue = singles[1].split('-')[1];
+
+			if(xkey === ykey){
+				if(xvalue - yvalue === 1 ){
+					if(yvalue > 1) need.push(ykey+'-'+(parseInt(yvalue)-1));
+					if(xvalue < 9) need.push(xkey+'-'+(parseInt(xvalue)+1));
+				} else if(xvalue - yvalue === -1 ){
+					if(xvalue > 1) need.push(ykey+'-'+(parseInt(xvalue)-1));
+					if(yvalue < 9) need.push(xkey+'-'+(parseInt(yvalue)+1));
+				}
+			}
+
+		} else if(pairs.length === 0 && singles.length === 1){
+			need.push(singles);
+		}
+	}
+
+	getNeed(winSet);
+	getNeed(revWinSet);
+	need = _.flatten(need);
+	need = _.uniq(need);
+
+	var answer = {total: 0};
+
+	_.each(need,function(x,i){
+		answer[x] = 4;
+		answer.total = answer.total + 4;
+	})
+
+	var knowSet = mj[set].slice();
+	knowSet.push(mj.PongmySets);
+	knowSet.push(mj.PonglSets);
+	knowSet.push(mj.PongrSets);
+	knowSet.push(mj.PonguSets);
+	if(set === 'test'){
+		knowSet.push(mj.Pongtest);
+	}
+	knowSet.push(mj.playedSets);
+	knowSet = _.flatten(knowSet);
+
+
+	_.each(need,function(set,index){
+		_.each(knowSet,function(exist,i){
+			if(set === exist){
+				answer[set]--;
+				answer.total --;
+			}
+		})
+	})
+
+	//console.log(answer);
+	return answer;
+
+}
 //AI to select which piece to play
 mj.nextAI = function(position, set){
 	var answer = 'no';
@@ -777,7 +850,7 @@ mj.nextAI = function(position, set){
 	var lindex;
 	_.each(mj[set],function(x,i){
 
-		if(mj.winProb(position,set,x).total > lprob){
+		if(mj.simpleWinProb(position,set,x).total > lprob){
 
 			lindex = i;
 			lprob = mj.winProb(position,set,x).total;
@@ -912,7 +985,7 @@ mj.winProb = function(position,set,piece){
 	var potential = [];
 
 	var getPot = function(){
-		console.log(Set);
+		//console.log(Set);
 		var calc = _.groupBy(Set,function(x,i){
 			return x.split('-')[0];
 		})
@@ -935,7 +1008,7 @@ mj.winProb = function(position,set,piece){
 	getPot();
 	potential = _.uniq(potential);
 
-	console.log(potential);
+	//console.log(potential);
 
 
 	Set = findAndReplace(piece,Set);
@@ -1563,9 +1636,9 @@ var intv = function(pos){
 		pSet = mj.PongrSets;
 	}
 	if(pSet.length===0){
-		return 50;
+		return 500;
 	} else if(pSet.length <6){
-		return 300;
+		return 500;
 	} else {
 		return 500;
 	}
