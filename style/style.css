@@ -347,3 +347,39 @@ div#dev {
 	color: black;
 	text-align: left;
 }
+
+.diceset {
+	width: 395px;
+	position: relative;
+	top: -350px;
+	margin: 0 auto 0 auto;
+	display: inline-block;
+	height: 100px;
+	z-index: 6;
+}
+
+div#dice1,div#dice2 {
+	width: 100px;
+	overflow-x: hidden;
+	display: inline-block;
+}
+
+img#one {
+	margin-left: 0px;
+}
+
+img#two {
+	margin-left: -100px;
+}
+img#three {
+	margin-left: -200px;
+}
+img#four {
+	margin-left: -300px;
+}
+img#five {
+	margin-left: -400px;
+}
+img#six {
+	margin-left: -500px;
+}

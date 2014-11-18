@@ -102,7 +102,7 @@ mj.initialize = function(){
 	$('.wSet').html('');
 	$('table#winning').html('');
 	$('div#winning').hide();
-	$('img').remove();
+	$('.myCanvas img').remove();
 
 
 	mj.mySets = [];
@@ -184,7 +184,7 @@ mj.sKongrSets = [];
 mj.sKonguSets = [];
 mj.sKonglSets = [];
 mj.KongStatus = 'none';
-mj.house = '';
+mj.house = ['me','mySets'];
 mj.meCover = '';
 mj.upCover = '';
 mj.rightCover = '';
@@ -210,30 +210,62 @@ mj.readySets = function(sets){
 	//mj.displayGameSets();
 
 
-	while(this.gameSets.length > 83){
+	while(this.gameSets.length > 84){
 		this.mySets.push(this.gameSets.pop());
 		this.mySets.sort();
-		if(this.mySets.length>13) {return};
+		//if(this.mySets.length>13) {return};
 
 		this.rSets.push(this.gameSets.pop());
 		this.rSets.sort();
-		if(this.rSets.length>13) {return};
+		//if(this.rSets.length>13) {return};
 
 		this.uSets.push(this.gameSets.pop());
 		this.uSets.sort();
-		if(this.uSets.length>13) {return};
+		//if(this.uSets.length>13) {return};
 
 		this.lSets.push(this.gameSets.pop());
 		this.lSets.sort();
-		if(this.lSets.length>13) {return};
+		//if(this.lSets.length>13) {return};
 	}
+
+	mj[mj.house[1]].push(mj.gameSets.pop());
+	mj.currentPos = mj.house[0];
+	if(mj.currentPos!=='me'){
+		mj.next(mj.house[0],false);
+	};
 }
 
+
+
 //Roll Dice
-mj.rollDice = function(){
-	var dice1 = _.shuffle([1,2,3,4,5,6])[0];
-	var dice2 = _.shuffle([1,2,3,4,5,6])[0];
-	console.log(dice1+','+dice2);
+var roll = new buzz.sound('../diceroll.mp3');
+mj.rollDice = function(time){
+
+
+
+	var dice1 = _.shuffle(['one','two','three','four','five','six'])[0];
+	var dice2 = _.shuffle(['one','two','three','four','five','six'])[0];
+
+	roll.play();
+	
+	var rolling = setInterval(function(){
+		var random1 = _.shuffle(['one','two','three','four','five','six'])[0];
+		var random2 = _.shuffle(['one','two','three','four','five','six'])[0];
+		$('div#dice1>img').attr('id',random1);
+		$('div#dice2>img').attr('id',random2);
+	},50);
+	
+	_.delay(function(){
+		clearInterval(rolling);
+		$('div#dice1>img').attr('id',dice1);
+		$('div#dice2>img').attr('id',dice2);
+	},time)
+
+	_.delay(function(){
+		mj.initialize();
+		$('div.diceset').hide();
+	},time+250)
+
 	
 }
 
@@ -888,9 +920,9 @@ mj.aKong = function(position,set,last){
 			}
 
 			var threshold = 99;
-			if(mj.gameSets < 41){
+			if(mj.gameSets.length < 41){
 				threshold = 4;
-			} if (mj.gameSets <21){
+			} if (mj.gameSets.length <21){
 				threshold = 1;
 			}
 
@@ -910,11 +942,12 @@ mj.aKong = function(position,set,last){
 				mj.displayPong(mj['Pong'+set],position);
 
 				if(mj.stealaKong(position,last)){
+					console.log('Stolen!')
 					return;
 				}
 
 				mj[position+'Points'] = mj[position+'Points'] + 3;
-				console.log(mj[position+'Points'])
+				
 				var winds = ['me','up','right','left'];
 				_.each(winds,function(x,i){
 					if(x!== position){
@@ -1746,6 +1779,7 @@ mj.sKongtest = [];
 //Winning Screen
 mj.win = function(position,sets){
 	this.currentPos = 'win';
+	
 	showOppo = true;
 	this.refresh('left');
 	this.refresh('right');
@@ -1836,28 +1870,66 @@ mj.win = function(position,sets){
 
 	  var winnings = 2;
 
+	  var rjp;
+	  var ujp;
+	  var ljp;
+	  var mjp;
+	  if(this.house[0]==='me'){
+	  	mjp = ['1','5','9','north'];
+	  	rjp = ['2','6','east','chun'];
+	  	ujp = ['3','7','south','green'];
+	  	ljp = ['4','8','west','haku'];
+	  } else if(this.house[0]==='right'){
+	  	rjp = ['1','5','9','north'];
+	  	ujp = ['2','6','east','chun'];
+	  	ljp = ['3','7','south','green'];
+	  	mjp = ['4','8','west','haku'];
+	  } else if(this.house[0]==='up'){
+	  	ujp = ['1','5','9','north'];
+	  	ljp = ['2','6','east','chun'];
+	  	mjp = ['3','7','south','green'];
+	  	rjp = ['4','8','west','haku'];
+	  } else if(this.house[0]==='left'){
+	  	ljp = ['1','5','9','north'];
+	  	mjp = ['2','6','east','chun'];
+	  	rjp = ['3','7','south','green'];
+	  	ujp = ['4','8','west','haku'];
+	  }
+
+	  this.house = [position,sets];
+
+
+
 	  _.each(jackpot,function(jpot,i){
 	  	if(position === 'me'){
 	  		pot = jpot.split('-')[1];
 
-	  		if(pot === '1' || pot === '5' || pot === '9' || pot === 'north'){
-	  			winnings = winnings +2;
-	  		}
+	  		_.each(mjp,function(val,index){
+	  			if(pot === val){
+	  				winnings = winnings +2;
+	  			}
+	  		})
 	  	} else if (position === 'right'){
 	  		pot = jpot.split('-')[1];
-	  		if(pot === '2' || pot === '6' || pot === 'east' || pot === 'chun'){
-	  			winnings = winnings +2;
-	  		}
+	  		_.each(rjp,function(val,index){
+	  			if(pot === val){
+	  				winnings = winnings +2;
+	  			}
+	  		})
 	  	} else if (position === 'up'){
 	  		pot = jpot.split('-')[1];
-	  		if(pot === '3' || pot === '7' || pot === 'south' || pot === 'green'){
-	  			winnings = winnings +2;
-	  		}
+	  		_.each(ujp,function(val,index){
+	  			if(pot === val){
+	  				winnings = winnings +2;
+	  			}
+	  		})
 	  	} else if (position === 'left'){
 	  		pot = jpot.split('-')[1];
-	  		if(pot === '4' || pot === '8' || pot === 'west' || pot === 'haku'){
-	  			winnings = winnings +2;
-	  		}
+	  		_.each(ljp,function(val,index){
+	  			if(pot === val){
+	  				winnings = winnings +2;
+	  			}
+	  		})
 	  	}
 	  })
 
@@ -1912,6 +1984,8 @@ mj.win = function(position,sets){
 	  	} else {
 	  		var cover = mj[position+'Cover'];
 	  		var pcover = mj[position+'pCover'];
+	  		console.log(cover);
+	  		console.log(pcover);
 	  		if(pcover!==''){
 	  			mj[pcover+'Points'] = mj[pcover+'Points'] - winnings;
 	  		} else if(cover!==''){
@@ -2090,8 +2164,15 @@ mj.next = function(position, draw){
 
 //DOM Manipulation and Interactions
 $(document).ready(function(){
+	mj.gameSets = mj.shuffleSets();
+	mj.gameSets.length = 96;
+	mj.displayGameSets();
 
-	mj.initialize();
+	$(document).on('click','.diceset',function(){
+		
+		mj.rollDice(1000);
+	})
+	
 
 	$(document).on('mouseenter','img#me',function(){
 		$(this).stop().animate({
@@ -2135,7 +2216,19 @@ $(document).ready(function(){
 	})
 
 	$(document).on('click', 'div#replay', function(){
-		mj.initialize();
+		$('div.myCanvas img').remove();
+		mj.gameSets = mj.shuffleSets();
+		mj.gameSets.length = 96;
+		mj.displayGameSets();
+
+		if(mj.house[0]!=='me'){
+			$('div#winning').hide();
+			$('div.diceset').show();
+			mj.rollDice(1000);
+		} else {
+			$('div#winning').hide();
+			$('div.diceset').show();
+		}
 	})
 
 	$(document).on('click', 'div#Null', function(){
