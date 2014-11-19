@@ -114,6 +114,8 @@ div#left {
 	position: absolute;
 	top: 325px;
 	left: -220px;
+	-ms-transform: rotate(90deg);
+	-webkit-transform: rotate(90deg);
 	transform: rotate(90deg);
 }
 
@@ -123,6 +125,8 @@ div#right {
 	position: absolute;
 	top: 325px;
 	right: -220px;
+	-ms-transform: rotate(270deg);
+	-webkit-transform: rotate(270deg);
 	transform: rotate(270deg);
 }
 
@@ -132,6 +136,8 @@ div#up {
 	position: absolute;
 	top: 20px;
 	left: 85px;
+	-ms-transform: rotate(180deg);
+	-webkit-transform: rotate(180deg);
 	transform: rotate(180deg);
 }
 
@@ -287,6 +293,8 @@ div#gleft {
 	position: absolute;
 	top: 325px;
 	left: -105px;
+	-ms-transform: rotate(90deg);
+	-webkit-transform: rotate(90deg);
 	transform: rotate(90deg);
 }
 
@@ -296,6 +304,8 @@ div#gright {
 	position: absolute;
 	top: 325px;
 	right: -107px;
+	-ms-transform: rotate(270deg);
+	-webkit-transform: rotate(270deg);
 	transform: rotate(270deg);
 }
 
@@ -305,6 +315,8 @@ div#gup {
 	position: absolute;
 	top: 74px;
 	left: 145px;
+	-ms-transform: rotate(180deg);
+	-webkit-transform: rotate(180deg);
 	transform: rotate(180deg);
 }
 
