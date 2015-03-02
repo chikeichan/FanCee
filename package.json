@@ -1,0 +1,22 @@
+{
+  "name": "FanCee",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "description": "> FanCee is a Mahjong game developed using Javascript, and deployed to Google Play Store using PhoneGap.",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/chikeichan/FanCee"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chikeichan/FanCee/issues"
+  },
+  "homepage": "https://github.com/chikeichan/FanCee",
+  "dependencies": {
+    "express": "^4.12.1"
+  }
+}

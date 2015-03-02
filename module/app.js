@@ -238,7 +238,7 @@ mj.readySets = function(sets){
 
 
 //Roll Dice
-var roll = new buzz.sound('../diceroll.mp3');
+var roll = new buzz.sound('../sounds/diceroll.mp3');
 mj.rollDice = function(time){
 
 
@@ -1086,8 +1086,8 @@ mj.readSet = function(set){
 	return set.split('-');
 };
 
-var sound = new buzz.sound('../wood.mp3');
-var sound2 = new buzz.sound('../wood.mp3');
+var sound = new buzz.sound('../sounds/wood.mp3');
+var sound2 = new buzz.sound('../sounds/wood.mp3');
 
 var preSound = true;
 var playWood = function(){
